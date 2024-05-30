@@ -14,3 +14,4 @@ A tool to help with fantasy soccer auction and weekly team building.
 # TODOs
 - [ ] download team players set (rosa) and set up something in a database style to retrieve the teammates if neeeded
 - [ ] don't save only CSVs, but build an actual database
+- [ ] from historic values series (time series table) calculate in avg malus-bonus to add to seasonal-resume table

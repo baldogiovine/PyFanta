@@ -1,4 +1,4 @@
-"""Module to fetch data regarding Serie A players"""
+"""Module to get players links. Links are necessary to scrape players data"""
 
 import uuid
 from dataclasses import dataclass, field
@@ -6,8 +6,6 @@ from dataclasses import dataclass, field
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-
-from src.utils import utils
 
 
 @dataclass
@@ -61,22 +59,3 @@ class GetPlayersLinks:
 
     def get_dataframe(self) -> pd.DataFrame:
         return self.df
-
-
-@dataclass
-class GetPlayersAttributes:
-    link: str
-
-    def __post_init__(self):
-        self.html = requests.get(self.link, timeout=5)
-        self.soup = BeautifulSoup(self.html.content, "lxml")
-        self.avg_grade = self.get_avg_grade()
-        self.avg_fanta_grade = self.get_avg_fanta_grade()
-
-    def get_avg_grade(self) -> float:
-        value = self.soup.find("span", class_="badge badge-primary avg").text
-        return utils.str_to_float(value)
-
-    def get_avg_fanta_grade(self) -> float:
-        value = self.soup.find("span", class_="badge badge-info avg").text
-        return utils.str_to_float(value)
