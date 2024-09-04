@@ -25,8 +25,8 @@ df_links = pd.read_csv("data/players_links_2023-24.csv")
 player_data = []
 # FIXME: [:10] is just to test, later it has to be removed
 for link, player_id in tqdm(
-    zip(df_links.link[:10], df_links.player_id[:10]),
-    total=len(df_links.link[:10]),
+    zip(df_links.link, df_links.player_id),
+    total=len(df_links.link),
     desc="Downloading players attributes",
 ):
     player_attrs = GetPlayersAttributes(link)
@@ -51,7 +51,9 @@ for link, player_id in tqdm(
             "team": player_attrs.team,
         }
     )
-    time.sleep(randint(0, 300) / 100)
+    sleepy_number = randint(0, 10)
+    if sleepy_number == 3 or sleepy_number == 7:
+        time.sleep(randint(0, 300) / 100)
 df = pd.DataFrame(player_data)
 df.to_csv(
     "data/provola_attributes.csv",
@@ -61,41 +63,41 @@ df.to_csv(
 )
 
 
-# Get players descriptions
-# FIXME: split descriptions in a different class
-# otherwise all the class is initiazlized, and uselessly scraps two times all data
-# FIXME: [:10] is just to test, later it has to be removed
-player_data = []
-for link, player_id in tqdm(
-    zip(df_links.link[:10], df_links.player_id[:10]),
-    total=len(df_links.link[:10]),
-    desc="Downloading players descriptions",
-):
-    player_attrs = GetPlayersAttributes(link)
-    player_data.append(
-        {
-            "id": player_id,
-            "description": player_attrs.description,
-            "fanta_description": player_attrs.fanta_description,
-        }
-    )
-    time.sleep(randint(0, 300) / 100)
-df = pd.DataFrame(player_data)
-df.to_csv(
-    "data/provola_descriptions.csv",
-    index=False,
-    quotechar='"',
-    quoting=QUOTE_ALL,
-)
+# # Get players descriptions
+# # FIXME: split descriptions in a different class
+# # otherwise all the class is initiazlized, and uselessly scraps two times all data
+# # FIXME: [:10] is just to test, later it has to be removed
+# player_data = []
+# for link, player_id in tqdm(
+#     zip(df_links.link, df_links.player_id),
+#     total=len(df_links.link),
+#     desc="Downloading players attributes",
+# ):
+#     player_attrs = GetPlayersAttributes(link)
+#     player_data.append(
+#         {
+#             "id": player_id,
+#             "description": player_attrs.description,
+#             "fanta_description": player_attrs.fanta_description,
+#         }
+#     )
+#     time.sleep(randint(0, 300) / 100)
+# df = pd.DataFrame(player_data)
+# df.to_csv(
+#     "data/provola_descriptions.csv",
+#     index=False,
+#     quotechar='"',
+#     quoting=QUOTE_ALL,
+# )
 
 
 # Get players historical variables
 # FIXME: [:10] is just to test, later it has to be removed
 player_data = []
 for link, player_id in tqdm(
-    zip(df_links.link[:10], df_links.player_id[:10]),
-    total=len(df_links.link[:10]),
-    desc="Downloading players historical values",
+    zip(df_links.link, df_links.player_id),
+    total=len(df_links.link),
+    desc="Downloading players attributes",
 ):
     player_attrs = GetPlayersHistoricalStats(player_link=link, year="2023-24")
     player_data.append(
