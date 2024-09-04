@@ -1,10 +1,9 @@
 [project]
 name = "PyFanta"
 authors = [
-    {name = "baldo.giovine"}
+    {name = "baldogiovine"}
 ]
 readme = "README.md"
-dynamic = ["version"]
 description = "<An API to scrape Fantacalcio data.>"
 requires-python = ">=3.9"
 dependencies = [
