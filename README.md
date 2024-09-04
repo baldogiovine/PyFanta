@@ -37,4 +37,3 @@ bla bla bla
 ## Credits
 
 Author: [baldogiovine](https://github.com/baldogiovine)
->>>>>>> develop
