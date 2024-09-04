@@ -1,5 +1,6 @@
-"""Module to fetch data regarding Serie A players"""
+"""Module to get players links. Links are necessary to scrape players data"""
 
+import os
 import uuid
 from dataclasses import dataclass, field
 
@@ -7,12 +8,33 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-from src.utils import utils
-
 
 @dataclass
 class GetPlayersLinks:
-    year: int
+    """A class to scrape and manage player links from a specified year.
+
+    This class is designed to fetch player links from the Leghe Fantacalcio website
+    for a specified year. It performs HTTP requests to get the HTML content,
+    parses the content to extract player names and their links, and stores
+    this information in a pandas DataFrame. The class also provides functionality
+    to add unique identifiers to each player and save the DataFrame as a CSV file.
+
+    Attributes
+    ----------
+    year : str
+        The year for which player links are to be fetched. e.g., "2023-24", "2022-23".
+
+    Other Attributes
+    ----------------
+    url : str
+        The constructed URL based on the specified year.
+    soup : BeautifulSoup
+        The BeautifulSoup object used to parse the HTML content.
+    df : pd.DataFrame
+        DataFrame to store player names and links.
+    """
+
+    year: str
     url: str = field(init=False)
     soup: BeautifulSoup = field(init=False)
     df: pd.DataFrame = field(
@@ -26,14 +48,17 @@ class GetPlayersLinks:
         self.soup = BeautifulSoup(response.content, "lxml")
 
     def get_full_url(self) -> str:
+        """Construct the full URL for fetching player links."""
         base_link = "https://www.fantacalcio.it/quotazioni-fantacalcio"
         return f"{base_link}/{self.year}/"
 
-    def check_status_code(self, response) -> None:
+    def check_status_code(self, response: requests.Response) -> None:
+        """Check the status code of the response."""
         if response.status_code != 200:
-            raise ValueError("Requests status code different from 200")
+            raise ValueError(f"Request failed with status code {response.status_code}")
 
     def get_links(self) -> "GetPlayersLinks":
+        """Extract player links from the webpage."""
         soup_link = (
             self.soup.find("div", class_="container")
             .find("div", class_="table-overflow")
@@ -53,30 +78,15 @@ class GetPlayersLinks:
         return self
 
     def add_ids(self) -> "GetPlayersLinks":
+        """Add unique IDs to each player link."""
         self.df["player_id"] = [str(uuid.uuid4()) for _ in range(len(self.df))]
         return self
 
     def save_csv(self) -> None:
+        """Save the DataFrame to a CSV file."""
+        os.makedirs("data", exist_ok=True)
         self.df.to_csv(f"data/players_links_{self.year}.csv", index=False)
 
     def get_dataframe(self) -> pd.DataFrame:
+        """Return the DataFrame containing player links and IDs."""
         return self.df
-
-
-@dataclass
-class GetPlayersAttributes:
-    link: str
-
-    def __post_init__(self):
-        self.html = requests.get(self.link, timeout=5)
-        self.soup = BeautifulSoup(self.html.content, "lxml")
-        self.avg_grade = self.get_avg_grade()
-        self.avg_fanta_grade = self.get_avg_fanta_grade()
-
-    def get_avg_grade(self) -> float:
-        value = self.soup.find("span", class_="badge badge-primary avg").text
-        return utils.str_to_float(value)
-
-    def get_avg_fanta_grade(self) -> float:
-        value = self.soup.find("span", class_="badge badge-info avg").text
-        return utils.str_to_float(value)
