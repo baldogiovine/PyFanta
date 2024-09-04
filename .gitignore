@@ -1,0 +1,50 @@
+# Python artifacts
+*.pyc
+__pycache__
+*.pytest_cache
+*.coverage
+
+# Data files
+*.csv
+*.tsv
+*.xlsx
+*.json
+*.parquet
+
+# Pdf files
+*.pdf
+
+# Virtual environment
+venv
+.venv
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# VS Code settings
+#.vscode/
+!settings.json
+
+# Environment variables
+.env
+
+# Pipenv lock file
+Pipfile.lock
+
+# Poetry lock file
+poetry.lock
+
+# Log files
+*.log
+
+#MacOS user preferences
+.DS_Store
+
+#various diroctories
+data
+v1
+#models
+notebooks
+references
+
+#Exceptions
