@@ -2,6 +2,7 @@
 *.pyc
 __pycache__
 *.pytest_cache
+*.coverage
 
 # Data files
 *.csv
@@ -21,7 +22,8 @@ venv
 .ipynb_checkpoints
 
 # VS Code settings
-.vscode/
+#.vscode/
+!settings.json
 
 # Environment variables
 .env
@@ -40,6 +42,7 @@ poetry.lock
 
 #various diroctories
 data
+v1
 #models
 notebooks
 references

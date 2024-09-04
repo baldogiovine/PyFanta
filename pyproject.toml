@@ -1,0 +1,48 @@
+[project]
+name = "PyFanta"
+authors = [
+    {name = "baldo.giovine"}
+]
+readme = "README.md"
+dynamic = ["version"]
+description = "<An API to scrape Fantacalcio data.>"
+requires-python = ">=3.9"
+dependencies = [
+	
+]
+
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F"]
+ignore = ["E501"]
+target-version = "py39"
+extend-exclude = ["data", "experimental", "deprecated"]
+
+[tool.ruff.lint]
+extend-select = [
+	"B", "Q", "I",
+    "D",   # pydocstyle
+	"PL" # pylint
+]
+
+[tool.ruff.format]
+# Enable reformatting of code snippets in docstrings.
+docstring-code-format = true
+
+[tool.coverage.run]
+omit = [
+
+]
+
+# [project.scripts]
+# app_name = "app_name.main:app"
+
+
+[project.urls]
+homepage = "https://github.com/baldogiovine/PyFanta"
+documentation = "<DOCS URL HERE>"
+source = "baldogiovine/PyFanta"
