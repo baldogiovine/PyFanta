@@ -1,4 +1,7 @@
+aiohttp
 beautifulsoup4
+fastapi[standard]
 pandas
 requests
 tqdm
+uvicorn
