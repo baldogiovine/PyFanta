@@ -7,7 +7,7 @@ readme = "README.md"
 description = "<An API to scrape Fantacalcio data.>"
 requires-python = ">=3.9"
 dependencies = [
-	
+
 ]
 
 
@@ -26,11 +26,22 @@ extend-select = [
     "PL"   # pylint
 ]
 
-
-
 [tool.ruff.format]
-# Enable reformatting of code snippets in docstrings.
 docstring-code-format = true
+
+[tool.mypy]
+mypy_path = ["stubs"]
+incremental = true
+strict = true
+python_version = "3.9"
+exclude = [
+    "tests/",
+    "docs/",
+]
+
+# (Optional) Enable automatic installation of missing type stubs
+install_types = true
+non_interactive = true
 
 [tool.coverage.run]
 omit = [

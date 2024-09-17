@@ -1,24 +1,29 @@
 """Router to get players links. Links are necessary to scrape players data."""
 
-from fastapi import FastAPI, HTTPException
+from typing import Dict, List, no_type_check
 
-from src.scraper.get_player_links import GetPlayersLinks
+from fastapi import FastAPI
+
+from src.scraper.get_players_links import GetPlayersLinks
 
 app = FastAPI()
 
 
 @app.get("/players-links/{year}")
-def get_players_links(year: str):
-    """Endpoint to get player links for a specified year."""
-    try:
-        scraper = GetPlayersLinks(year=year)
-        scraper.get_links()
-        return {"data": scraper.data}
-    except ValueError as ve:
-        # Handle specific error if the request fails
-        raise HTTPException(status_code=400, detail=str(ve)) from ve
-    except Exception as e:
-        # General exception handler
-        raise HTTPException(
-            status_code=500, detail="An error occurred while processing the request."
-        ) from e
+@no_type_check
+async def get_players_links(year: str) -> List[Dict[str, str]]:
+    """Endpoint to get players' names and links for a specified year.
+
+    Parameters
+    ----------
+    year : str
+        The year for which player links are to be fetched, e.g., "2023-24", "2022-23".
+
+    Returns:
+    -------
+    List[Dict[str, str]]
+        List of dictionaries containing players' names and links.
+    """
+    scraper = GetPlayersLinks(year=year)
+    data: List[Dict[str, str]] = await scraper.get_links()
+    return {"data": data}
