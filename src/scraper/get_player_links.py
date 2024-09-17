@@ -6,7 +6,7 @@ from typing import Dict, List
 import requests
 from bs4 import BeautifulSoup
 
-from src.constants import CommonConstants, PlayerLinksConstants
+from src.scraper.constants import CommonConstants, PlayerLinksConstants
 
 
 @dataclass

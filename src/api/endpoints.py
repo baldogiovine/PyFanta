@@ -1,13 +1,13 @@
 """Router to get players links. Links are necessary to scrape players data."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import FastAPI, HTTPException
 
-from src.scraping import GetPlayersLinks
+from src.scraper.get_player_links import GetPlayersLinks
 
-router = APIRouter()
+app = FastAPI()
 
 
-@router.get("/players-links/{year}")
+@app.get("/players-links/{year}")
 def get_players_links(year: str):
     """Endpoint to get player links for a specified year."""
     try:

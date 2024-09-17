@@ -48,3 +48,4 @@ notebooks
 references
 
 #Exceptions
+src/scraper/get_player_historical_stats.py
