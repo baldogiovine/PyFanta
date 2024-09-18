@@ -62,10 +62,8 @@ class GetPlayersLinks:
             assert isinstance(table_overflow, Tag)
             table: Union[Tag, None] = table_overflow.find("table")
             assert isinstance(table, Tag)
-            links: Union[Tag, None] = table.find_all(
-                "a", class_="player-name player-link"
-            )
-            assert isinstance(links, Tag)
+            links: List[Tag] = table.find_all("a", class_="player-name player-link")
+            assert isinstance(links, List)
 
             data: List[Dict[str, str]] = [
                 {

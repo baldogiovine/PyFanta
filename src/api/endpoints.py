@@ -4,12 +4,16 @@ from typing import Dict, List, no_type_check
 
 from fastapi import FastAPI
 
+from src.api.models import PlayersLinksResponse
 from src.scraper.get_players_links import GetPlayersLinks
 
 app = FastAPI()
 
 
-@app.get("/players-links/{year}")
+@app.get(
+    "/players-links/{year}",
+    response_model=PlayersLinksResponse,
+)
 @no_type_check
 async def get_players_links(year: str) -> List[Dict[str, str]]:
     """Endpoint to get players' names and links for a specified year.
