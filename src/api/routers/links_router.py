@@ -1,18 +1,23 @@
-"""Router to get players links. Links are necessary to scrape players data."""
+"""Module to define a router to get players links."""
 
 from typing import Dict, List, no_type_check
 
-from src.api.main import app
+from fastapi import APIRouter
+
 from src.api.models import PlayersLinksResponse
 from src.scraper.get_players_links import GetPlayersLinks
 
+router = APIRouter()
 
-@app.get(
+
+@router.get(
     "/players-links/{year}",
     response_model=PlayersLinksResponse,
+    summary="Get players' names and links for a specified year",
+    tags=["Links"],
 )
 @no_type_check
-async def get_players_links(year: str) -> List[Dict[str, str]]:
+async def get_players_links(year: str) -> Dict[str, List[Dict[str, str]]]:
     """Endpoint to get players' names and links for a specified year.
 
     Parameters
@@ -22,8 +27,8 @@ async def get_players_links(year: str) -> List[Dict[str, str]]:
 
     Returns:
     -------
-    List[Dict[str, str]]
-        List of dictionaries containing players' names and links.
+    Dict[str, List[Dict[str, str]]]
+        A dictionary with a key "data" containing a list of players' names and links.
     """
     scraper = GetPlayersLinks(year=year)
     data: List[Dict[str, str]] = await scraper.get_links()
