@@ -4,7 +4,7 @@
 class CommonConstants:
     """Class containg common constants."""
 
-    status_code_ok: int = 200
+    status_code_200: int = 200
 
 
 class PlayerLinksConstants(CommonConstants):

@@ -14,8 +14,4 @@
         },
         "editor.defaultFormatter": "charliermarsh.ruff",
     },
-    "editor.rulers": [88],
-    "workbench.colorCustomizations": {
-    "editorRuler.foreground": "#ffa1dc4c"
-    },
 }
