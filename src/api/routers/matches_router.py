@@ -9,8 +9,6 @@ from src.scraper.get_matches_stats import GetMatchesStats
 
 router = APIRouter()
 
-# TODO: add player_link dict to router link.
-
 
 @router.post(
     "v1/matches-stats",
@@ -33,18 +31,18 @@ async def get_matches_stats(player_link: PlayerLink) -> MatchesStatsResponse:
     """
     scraper = GetMatchesStats(player_link=player_link)
 
-    name: str = scraper._name
-    game_day: List[int] = scraper._get_game_day()
-    grade: List[float] = await scraper._get_grade()
-    fanta_grade: List[float] = await scraper._get_fanta_grade()
-    bonus: List[float] = await scraper._get_bonus()
-    malus: List[float] = await scraper._get_malus()
-    home_team: List[str] = scraper._get_home_team()
-    guest_team: List[str] = scraper._get_guest_team()
-    home_team_score: List[int] = scraper._get_match_score()[0]
-    guest_team_score: List[int] = scraper._get_match_score()[1]
-    subsitution_in: List[float] = scraper._get_minute_in()
-    subsitution_out: List[float] = scraper._get_minute_out()
+    name: str = scraper.name
+    game_day: List[int] = scraper.get_game_day()
+    grade: List[float] = await scraper.get_grade()
+    fanta_grade: List[float] = await scraper.get_fanta_grade()
+    bonus: List[float] = await scraper.get_bonus()
+    malus: List[float] = await scraper.get_malus()
+    home_team: List[str] = await scraper.get_home_team()
+    guest_team: List[str] = await scraper.get_guest_team()
+    home_team_score: List[int] = await scraper.get_match_score()[0]
+    guest_team_score: List[int] = await scraper.get_match_score()[1]
+    subsitution_in: List[float] = await scraper.get_minute_in()
+    subsitution_out: List[float] = await scraper.get_minute_out()
 
     # Prepare the response data
     data = {
