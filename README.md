@@ -30,6 +30,8 @@
 
 ```pip install -r requirements-dev.txt```
 
+```uvicorn src.api.main:app --reload```
+
 ### Quickstart
 bla bla bla
 

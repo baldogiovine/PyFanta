@@ -20,7 +20,7 @@ app.include_router(links_router)
 register_exception_handlers(app=app)
 
 
-@app.get("/")
+@app.get("/v1/")
 @no_type_check
 async def read_root() -> dict[str, str]:
     """Root endpoint.

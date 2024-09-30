@@ -11,13 +11,13 @@ router = APIRouter()
 
 
 @router.get(
-    "/players-links/{year}",
+    "/v1/players-links/{year}",
     response_model=PlayersLinksResponse,
     summary="Get players' names and links for a specified year",
     tags=["Links"],
 )
 @no_type_check
-async def get_players_links(year: str) -> Dict[str, List[Dict[str, str]]]:
+async def get_players_links(year: str) -> PlayersLinksResponse:
     """Endpoint to get players' names and links for a specified year.
 
     Parameters
@@ -27,9 +27,9 @@ async def get_players_links(year: str) -> Dict[str, List[Dict[str, str]]]:
 
     Returns:
     -------
-    Dict[str, List[Dict[str, str]]]
-        A dictionary with a key "data" containing a list of players' names and links.
+    PlayersLinksResponse
+        Players' names and links for a the `year` season.
     """
     scraper = GetPlayersLinks(year=year)
     data: List[Dict[str, str]] = await scraper.get_links()
-    return {"data": data}
+    return PlayersLinksResponse(data=data)
