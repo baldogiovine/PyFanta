@@ -1,8 +1,7 @@
 """Module to get players historical stats."""
 
 import asyncio
-from functools import wraps
-from typing import Any, Awaitable, Callable, List, Tuple, TypeVar, Union
+from typing import List, Tuple, Union
 
 import aiohttp
 from bs4 import BeautifulSoup
@@ -11,6 +10,7 @@ from bs4.element import Tag
 from src.api.models import PlayerLink
 from src.scraper import utils
 from src.scraper.exceptions import FetchError, PageStructureError
+from src.scraper.utils import check_for_soup
 
 
 class GetMatchesStats:
@@ -21,16 +21,16 @@ class GetMatchesStats:
         self.url: str = str(player_link.link)
         self.soup: Union[BeautifulSoup, None] = None
         self.game_day: Union[List[int], None] = None
-        self.grade: Union[List[float], None] = None
-        self.fanta_grade: Union[List[float], None] = None
-        self.bonus: Union[List[float], None] = None
-        self.malus: Union[List[float], None] = None
+        self.grade: Union[List[Union[float, None]], None] = None
+        self.fanta_grade: Union[List[Union[float, None]], None] = None
+        self.bonus: Union[List[Union[float, None]], None] = None
+        self.malus: Union[List[Union[float, None]], None] = None
         self.home_team: Union[List[str], None] = None
         self.guest_team: Union[List[str], None] = None
         self.home_team_score: Union[List[int], None] = None
         self.guest_team_score: Union[List[int], None] = None
-        self.sub_in: Union[List[float], None] = None
-        self.sub_out: Union[List[float], None] = None
+        self.sub_in: Union[List[Union[float, None]], None] = None
+        self.sub_out: Union[List[Union[float, None]], None] = None
 
     async def fetch_page(self) -> None:
         """Asynchronously fetch the page content and parse it with BeautifulSoup."""
@@ -46,37 +46,6 @@ class GetMatchesStats:
         except asyncio.TimeoutError as te:
             raise FetchError(f"Request to {self.url} timed out.") from te
 
-    F = TypeVar("F", bound=Callable[..., Awaitable[Any]])
-
-    @staticmethod
-    def check_for_soup(func: F) -> F:
-        """Decorator that ensures the BeautifulSoup object is initialized before
-        executing the decorated method.
-
-        Parameters
-        ----------
-        func : Callable[..., Awaitable[Any]]
-            The asynchronous method to be decorated.
-
-        Returns:
-        -------
-        Callable[..., Awaitable[Any]]
-            The wrapped asynchronous method with pre-execution checks.
-        """  # noqa: D205
-
-        @wraps(func)
-        async def wrapper(self, *args, **kwargs) -> Any:  # type: ignore
-            if not self.soup:
-                await self.fetch_page()
-            try:
-                return await func(self, *args, **kwargs)
-            except AttributeError as e:
-                raise PageStructureError(
-                    "Unexpected page structure while extracting data."
-                ) from e
-
-        return wrapper  # type: ignore
-
     def get_game_day(self) -> List[int]:
         """Gets game days.
 
@@ -90,7 +59,7 @@ class GetMatchesStats:
         return self.game_day
 
     @check_for_soup
-    async def get_grade(self) -> list[float]:
+    async def get_grade(self) -> list[Union[float, None]]:
         """Gets the real grade obtained by a player.
 
         Returns:
@@ -98,18 +67,20 @@ class GetMatchesStats:
         list[float]
             List of grades.
         """
-        grades: List[float] = []
+        grades: List[Union[float, None]] = []
         assert isinstance(self.soup, BeautifulSoup)
         for span in self.soup.find_all("span", class_="grade"):
-            grade: float = utils.str_to_float(str_to_replace=span.get("data-value"))
-            assert isinstance(grade, float)
+            grade: Union[float, None] = utils.str_to_float(
+                str_to_replace=span.get("data-value")
+            )
+            assert isinstance(grade, float) or grade is None
             grades.append(grade)
         self.grade = grades
 
         return self.grade
 
     @check_for_soup
-    async def get_fanta_grade(self) -> list[float]:
+    async def get_fanta_grade(self) -> list[Union[float, None]]:
         """Gets the fanta grade obtained by a player.
 
         Fanta grade is calculated based on the real grade summed with bonuses and
@@ -120,20 +91,20 @@ class GetMatchesStats:
         list[float]
             List of grades.
         """
-        fanta_grades: List[float] = []
+        fanta_grades: List[Union[float, None]] = []
         assert isinstance(self.soup, BeautifulSoup)
         for span in self.soup.find_all("span", class_="fanta-grade"):
-            fanta_grade: float = utils.str_to_float(
+            fanta_grade: Union[float, None] = utils.str_to_float(
                 str_to_replace=span.get("data-value")
             )
-            assert isinstance(fanta_grade, float)
+            assert isinstance(fanta_grade, float) or fanta_grade is None
             fanta_grades.append(fanta_grade)
         self.fanta_grade = fanta_grades
 
         return self.fanta_grade
 
     @check_for_soup
-    async def get_bonus(self) -> List[float]:
+    async def get_bonus(self) -> List[Union[float, None]]:
         """Gets the (eventual) bonus obtained by a player.
 
         Returns:
@@ -141,7 +112,7 @@ class GetMatchesStats:
         list[float]
             List of grades.
         """
-        bonus: List[float] = []
+        bonus: List[Union[float, None]] = []
         assert isinstance(self.soup, BeautifulSoup)
         x_axis_list: List[Tag] = self.soup.find_all("div", class_="x-axis")
         if len(x_axis_list) > 1:
@@ -157,14 +128,14 @@ class GetMatchesStats:
             one_bonus = utils.str_to_float(
                 str_to_replace=span.get("data-primary-value")
             )
-            assert isinstance(one_bonus, float)
+            assert isinstance(one_bonus, float) or one_bonus is None
             bonus.append(one_bonus)
         self.bonus = bonus
 
         return self.bonus
 
     @check_for_soup
-    async def get_malus(self) -> List[float]:
+    async def get_malus(self) -> List[Union[float, None]]:
         """Gets the (eventual) malus obtained by a player.
 
         Returns:
@@ -172,7 +143,7 @@ class GetMatchesStats:
         list[float]
             List of grades.
         """
-        malus: List[float] = []
+        malus: List[Union[float, None]] = []
         assert isinstance(self.soup, BeautifulSoup)
         x_axis_list: List[Tag] = self.soup.find_all("div", class_="x-axis")
         if len(x_axis_list) > 1:
@@ -188,7 +159,7 @@ class GetMatchesStats:
             one_malus = utils.str_to_float(
                 str_to_replace=span.get("data-secondary-value")
             )
-            assert isinstance(one_malus, float)
+            assert isinstance(one_malus, float) or one_malus is None
             malus.append(one_malus)
         self.malus = malus
 
@@ -270,7 +241,7 @@ class GetMatchesStats:
         return self.home_team_score, self.guest_team_score
 
     @check_for_soup
-    async def get_minute_in(self) -> List[float]:
+    async def get_minute_in(self) -> List[Union[float, None]]:
         """Gets minute a player entered the field as a substitution.
 
         If `np.nan` it can mean that the player started as a starting player or that
@@ -282,18 +253,20 @@ class GetMatchesStats:
         List[int]
             List of minutues a player entered the field as a substitution.
         """
-        subs_in: List[float] = []
+        subs_in: List[Union[float, None]] = []
         assert isinstance(self.soup, BeautifulSoup)
         for span in self.soup.find_all("span", class_="sub-in"):
-            sub_in: float = utils.empty_to_nan(value=span.get("data-minute"))
-            assert isinstance(sub_in, float)
+            sub_in: Union[float, None] = utils.empty_to_none(
+                value=span.get("data-minute")
+            )
+            assert isinstance(sub_in, float) or sub_in is None
             subs_in.append(sub_in)
         self.sub_in = subs_in
 
         return self.sub_in
 
     @check_for_soup
-    async def get_minute_out(self) -> List[float]:
+    async def get_minute_out(self) -> List[Union[float, None]]:
         """Gets minute a player exited the field as a substitution.
 
         If `np.nan` it can mean that a player never exited the field or that
@@ -305,11 +278,13 @@ class GetMatchesStats:
         List[int]
             List of minutues a player exited the field as a substitution.
         """
-        subs_out: List[float] = []
+        subs_out: List[Union[float, None]] = []
         assert isinstance(self.soup, BeautifulSoup)
         for span in self.soup.find_all("span", class_="sub-in"):
-            sub_out: float = utils.empty_to_nan(value=span.get("data-minute"))
-            assert isinstance(sub_out, float)
+            sub_out: Union[float, None] = utils.empty_to_none(
+                value=span.get("data-minute")
+            )
+            assert isinstance(sub_out, float) or sub_out is None
             subs_out.append(sub_out)
         self.sub_out = subs_out
 

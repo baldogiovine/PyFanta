@@ -1,6 +1,6 @@
 """Module to organize Pydantic data validation models for FastAPI endpoints."""
 
-from typing import List
+from typing import List, Union
 
 from pydantic import BaseModel
 
@@ -23,19 +23,19 @@ class MatchesStats(BaseModel):
 
     name: str
     game_day: List[int]
-    grade: List[float]
-    fanta_grade: List[float]
-    bonus: List[float]
-    malus: List[float]
+    grade: List[Union[float, None]]
+    fanta_grade: List[Union[float, None]]
+    bonus: List[Union[float, None]]
+    malus: List[Union[float, None]]
     home_team: List[str]
     guest_team: List[str]
     home_team_score: List[int]
     guest_team_score: List[int]
-    subsitution_in: List[float]
-    subsitution_out: List[float]
+    subsitution_in: List[Union[float, None]]
+    subsitution_out: List[Union[float, None]]
 
 
 class MatchesStatsResponse(BaseModel):
     """Data validation model for all the matches."""
 
-    data: List[MatchesStats]
+    data: Union[MatchesStats, List[MatchesStats]]

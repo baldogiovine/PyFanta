@@ -1,6 +1,6 @@
 """Module to define a router to get matches stats."""
 
-from typing import List, no_type_check
+from typing import List, Union, no_type_check
 
 from fastapi import APIRouter
 
@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.post(
-    "v1/matches-stats",
+    "/v1/matches-stats",
     response_model=MatchesStatsResponse,
     summary="Get player's match stats",
     tags=["Matches"],
@@ -33,16 +33,15 @@ async def get_matches_stats(player_link: PlayerLink) -> MatchesStatsResponse:
 
     name: str = scraper.name
     game_day: List[int] = scraper.get_game_day()
-    grade: List[float] = await scraper.get_grade()
-    fanta_grade: List[float] = await scraper.get_fanta_grade()
-    bonus: List[float] = await scraper.get_bonus()
-    malus: List[float] = await scraper.get_malus()
+    grade: List[Union[float, None]] = await scraper.get_grade()
+    fanta_grade: List[Union[float, None]] = await scraper.get_fanta_grade()
+    bonus: List[Union[float, None]] = await scraper.get_bonus()
+    malus: List[Union[float, None]] = await scraper.get_malus()
     home_team: List[str] = await scraper.get_home_team()
     guest_team: List[str] = await scraper.get_guest_team()
-    home_team_score: List[int] = await scraper.get_match_score()[0]
-    guest_team_score: List[int] = await scraper.get_match_score()[1]
-    subsitution_in: List[float] = await scraper.get_minute_in()
-    subsitution_out: List[float] = await scraper.get_minute_out()
+    home_team_score, guest_team_score = await scraper.get_match_score()
+    subsitution_in: List[Union[float, None]] = await scraper.get_minute_in()
+    subsitution_out: List[Union[float, None]] = await scraper.get_minute_out()
 
     # Prepare the response data
     data = {
