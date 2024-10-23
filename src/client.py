@@ -1,6 +1,7 @@
 """Client module."""
 
 import json
+from pathlib import Path
 from typing import Dict, List, Union
 
 import requests
@@ -22,7 +23,7 @@ def get_players_links(year: str) -> Union[Dict[str, List[Dict[str, str]]], None]
 
         Otherwise, None.
     """
-    url = f"http://127.0.0.1:8000/players-links/{year}"
+    url = f"http://127.0.0.1:8000/v1/players-links/{year}"
     try:
         response: Response = requests.get(
             url,
@@ -39,12 +40,22 @@ def get_players_links(year: str) -> Union[Dict[str, List[Dict[str, str]]], None]
 
 
 if __name__ == "__main__":
-    YEAR = "2023-24"
-    data: Union[Dict[str, List[Dict[str, str]]], None] = get_players_links(year=YEAR)
-    if data:
-        filename = f"data/players_links_{YEAR}.json"
-        with open(filename, "w", encoding="utf-8") as json_file:
-            json.dump(data, json_file, indent=4)
-            print(f"data have been saved at {filename}")
-    else:
-        print("Failed to retrieve data.")
+    # TODO: some code to startup and close the api
+    data_folder_path: Path = Path("data")
+    if not data_folder_path.exists():
+        data_folder_path.mkdir(parents=True, exist_ok=True)
+
+    YEAR = "2024-25"
+    players_links_json: Path = Path(f"data/players_links_{YEAR}.json")
+
+    if not players_links_json.is_file():
+        data: Union[Dict[str, List[Dict[str, str]]], None] = get_players_links(
+            year=YEAR
+        )
+        if data:
+            with players_links_json.open(mode="w", encoding="utf-8") as file:
+                json.dump(data, file, indent=4)
+        else:
+            print("Failed to retrieve data.")
+
+    # TODO: get_macth_stats with tdqm()

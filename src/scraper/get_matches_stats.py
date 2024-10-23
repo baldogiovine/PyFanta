@@ -70,7 +70,7 @@ class GetMatchesStats:
         grades: List[Union[float, None]] = []
         assert isinstance(self.soup, BeautifulSoup)
         for span in self.soup.find_all("span", class_="grade"):
-            grade: Union[float, None] = utils.str_to_float(
+            grade: Union[float, None] = utils.str_to_none(
                 str_to_replace=span.get("data-value")
             )
             assert isinstance(grade, float) or grade is None
@@ -94,7 +94,7 @@ class GetMatchesStats:
         fanta_grades: List[Union[float, None]] = []
         assert isinstance(self.soup, BeautifulSoup)
         for span in self.soup.find_all("span", class_="fanta-grade"):
-            fanta_grade: Union[float, None] = utils.str_to_float(
+            fanta_grade: Union[float, None] = utils.str_to_none(
                 str_to_replace=span.get("data-value")
             )
             assert isinstance(fanta_grade, float) or fanta_grade is None
@@ -125,9 +125,7 @@ class GetMatchesStats:
                 but found fewer."""
             )
         for span in x_axis.find_all("span"):
-            one_bonus = utils.str_to_float(
-                str_to_replace=span.get("data-primary-value")
-            )
+            one_bonus = utils.str_to_none(str_to_replace=span.get("data-primary-value"))
             assert isinstance(one_bonus, float) or one_bonus is None
             bonus.append(one_bonus)
         self.bonus = bonus
@@ -156,7 +154,7 @@ class GetMatchesStats:
                 but found fewer."""
             )
         for span in x_axis.find_all("span"):
-            one_malus = utils.str_to_float(
+            one_malus = utils.str_to_none(
                 str_to_replace=span.get("data-secondary-value")
             )
             assert isinstance(one_malus, float) or one_malus is None
@@ -280,7 +278,7 @@ class GetMatchesStats:
         """
         subs_out: List[Union[float, None]] = []
         assert isinstance(self.soup, BeautifulSoup)
-        for span in self.soup.find_all("span", class_="sub-in"):
+        for span in self.soup.find_all("span", class_="sub-out"):
             sub_out: Union[float, None] = utils.empty_to_none(
                 value=span.get("data-minute")
             )
@@ -289,3 +287,66 @@ class GetMatchesStats:
         self.sub_out = subs_out
 
         return self.sub_out
+
+    async def scrape_all(self) -> None:
+        """Fetch the page and scrape all available stats."""
+        await self.fetch_page()
+
+        self.get_game_day()
+        await self.get_grade()
+        await self.get_fanta_grade()
+        await self.get_bonus()
+        await self.get_malus()
+        await self.get_home_team()
+        await self.get_guest_team()
+        await self.get_match_score()
+        await self.get_minute_in()
+        await self.get_minute_out()
+
+        self.post_scraping_processing()
+
+    def post_scraping_processing(self) -> None:
+        """Performs data fixes or adjustments after all attributes have been scraped."""
+        self.post_game_day_fix()
+        self.post_bonus_fix()
+        self.post_malus_fix()
+
+    def post_game_day_fix(self) -> None:
+        """Performas data fixes on `game_day`."""
+        game_days: Union[List[int], None] = self.game_day
+        assert isinstance(game_days, list)
+        grades: Union[List[Union[float, None]], None] = self.grade
+        assert isinstance(grades, list)
+        n_days: int = len(grades)
+        game_days = game_days[:n_days]
+        assert isinstance(game_days, list)
+
+        self.game_day = game_days
+
+    def post_bonus_fix(self) -> None:
+        """Performas data fixes on `bonus`."""
+        bonus: Union[List[Union[float, None]], None] = self.bonus
+        assert isinstance(bonus, list)
+        grades: Union[List[Union[float, None]], None] = self.grade
+        assert isinstance(grades, list)
+        n_days: int = len(grades)
+        bonus = bonus[:n_days]
+        assert isinstance(bonus, list)
+
+        self.bonus = bonus
+
+    def post_malus_fix(self) -> None:
+        """Performas data fixes on `malus`."""
+        malus: Union[List[Union[float, None]], None] = self.malus
+        assert isinstance(malus, list)
+        grades: Union[List[Union[float, None]], None] = self.grade
+        assert isinstance(grades, list)
+        n_days: int = len(grades)
+        malus = malus[:n_days]
+        assert isinstance(malus, list)
+
+        for i in range(n_days):
+            if grades[i] is None and malus[i] == -1:
+                malus[i] = 0
+
+        self.malus = malus

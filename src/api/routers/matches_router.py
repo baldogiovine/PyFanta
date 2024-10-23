@@ -1,6 +1,6 @@
 """Module to define a router to get matches stats."""
 
-from typing import List, Union, no_type_check
+from typing import no_type_check
 
 from fastapi import APIRouter
 
@@ -31,31 +31,21 @@ async def get_matches_stats(player_link: PlayerLink) -> MatchesStatsResponse:
     """
     scraper = GetMatchesStats(player_link=player_link)
 
-    name: str = scraper.name
-    game_day: List[int] = scraper.get_game_day()
-    grade: List[Union[float, None]] = await scraper.get_grade()
-    fanta_grade: List[Union[float, None]] = await scraper.get_fanta_grade()
-    bonus: List[Union[float, None]] = await scraper.get_bonus()
-    malus: List[Union[float, None]] = await scraper.get_malus()
-    home_team: List[str] = await scraper.get_home_team()
-    guest_team: List[str] = await scraper.get_guest_team()
-    home_team_score, guest_team_score = await scraper.get_match_score()
-    subsitution_in: List[Union[float, None]] = await scraper.get_minute_in()
-    subsitution_out: List[Union[float, None]] = await scraper.get_minute_out()
+    await scraper.scrape_all()
 
-    # Prepare the response data
     data = {
-        "name": name,
-        "game_day": game_day,
-        "grade": grade,
-        "fanta_grade": fanta_grade,
-        "bonus": bonus,
-        "malus": malus,
-        "home_team": home_team,
-        "guest_team": guest_team,
-        "home_team_score": home_team_score,
-        "guest_team_score": guest_team_score,
-        "subsitution_in": subsitution_in,
-        "subsitution_out": subsitution_out,
+        "name": scraper.name,
+        "game_day": scraper.game_day,
+        "grade": scraper.grade,
+        "fanta_grade": scraper.fanta_grade,
+        "bonus": scraper.bonus,
+        "malus": scraper.malus,
+        "home_team": scraper.home_team,
+        "guest_team": scraper.guest_team,
+        "home_team_score": scraper.home_team_score,
+        "guest_team_score": scraper.guest_team_score,
+        "subsitution_in": scraper.sub_in,
+        "subsitution_out": scraper.sub_out,
     }
+
     return MatchesStatsResponse(data=data)

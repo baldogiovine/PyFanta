@@ -6,7 +6,7 @@ from typing import Any, Awaitable, Callable, TypeVar, Union
 from src.scraper.exceptions import PageStructureError
 
 
-def str_to_float(str_to_replace: str) -> Union[float, None]:
+def str_to_none(str_to_replace: str) -> Union[float, None]:
     """Converts a string with a comma as the decimal separator to a float."""
     if str_to_replace is None or str_to_replace == "":
         return None
