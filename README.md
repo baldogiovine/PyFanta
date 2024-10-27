@@ -27,8 +27,20 @@
 ## Getting started
 
 ### Installation
-
 ```pip install -r requirements-dev.txt```
+
+```uvicorn src.api.main:app --reload```
+
+### TODO
+- [x] fix malus (set it to 0 or null). for whatever reason a -1 mauls is set-up by
+default.
+- [x] check if it makes sense that all game days (from 1 to 38) are automatically
+generated since the beginning. other attributes may not have as many values. some
+players may have not joined the season since the first day. look if it is possible to
+scrape the game-day value
+- [x] for whatever reason bonus and malus automatically get 38 values. so cut them at
+the correct number of game days
+- [x] substitutioin_out is not working: it's taking values from substitution_in
 
 ### Quickstart
 bla bla bla

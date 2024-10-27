@@ -5,7 +5,7 @@ from typing import Dict, List, Union
 
 import aiohttp
 from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4.element import NavigableString, Tag
 
 from src.scraper.constants import PlayerLinksConstants
 from src.scraper.exceptions import FetchError, PageStructureError
@@ -54,13 +54,15 @@ class GetPlayersLinks:
             await self.__fetch_page()
         assert isinstance(self.__soup, BeautifulSoup)
         try:
-            container: Union[Tag, None] = self.__soup.find("div", class_="container")
+            container: Union[Tag, NavigableString, None] = self.__soup.find(
+                "div", class_="container"
+            )
             assert isinstance(container, Tag)
-            table_overflow: Union[Tag, None] = container.find(
+            table_overflow: Union[Tag, NavigableString, None] = container.find(
                 "div", class_="table-overflow"
             )
             assert isinstance(table_overflow, Tag)
-            table: Union[Tag, None] = table_overflow.find("table")
+            table: Union[Tag, NavigableString, None] = table_overflow.find("table")
             assert isinstance(table, Tag)
             links: List[Tag] = table.find_all("a", class_="player-name player-link")
             assert isinstance(links, List)
@@ -68,7 +70,7 @@ class GetPlayersLinks:
             data: List[Dict[str, str]] = [
                 {
                     "name": link.get_text(separator="\n", strip=True),
-                    "link": link.get("href"),
+                    "link": self.__get_attribute_as_str(tag=link, attr_name="href"),
                 }
                 for link in links
             ]
@@ -77,3 +79,28 @@ class GetPlayersLinks:
             raise PageStructureError(
                 "Unexpected page structure while extracting player links"
             ) from e
+
+    @staticmethod
+    def __get_attribute_as_str(tag: Tag, attr_name: str) -> str:
+        """Safely retrieve an attribute value from a BeautifulSoup Tag as a string.
+
+        Parameters
+        ----------
+        tag : Tag
+            The BeautifulSoup Tag object from which to retrieve the attribute.
+        attr_name : str
+            The name of the attribute to retrieve.
+
+        Returns:
+        -------
+        str
+            The attribute value as a string. If the attribute is not found or its
+            value is `None`, returns an empty string.
+        """
+        attr_value: Union[str, List[str], None] = tag.get(attr_name)
+        if isinstance(attr_value, str):
+            return attr_value
+        elif isinstance(attr_value, list):
+            return attr_value[0] if attr_value else ""
+        else:
+            return ""

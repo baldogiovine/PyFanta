@@ -16,10 +16,13 @@ convention = "google"
 
 [tool.ruff]
 line-length = 88
-select = ["E", "F"]
-ignore = ["E501"]
+
 target-version = "py39"
 extend-exclude = ["data", "experimental", "deprecated"]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]
 extend-select = [
     "B", "Q", "I",
     "D",   # pydocstyle

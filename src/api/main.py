@@ -6,15 +6,17 @@ from fastapi import FastAPI
 
 from src.api.exceptions import register_exception_handlers
 from src.api.routers.links_router import router as links_router
+from src.api.routers.matches_router import router as matches_router
 
 app = FastAPI(
     title="Players API",
-    description="An API to get players' names and links for a specified year.",
+    description="An API to get players' information for the fantacalcio.",
     version="1.0.0",
 )
 
 # Include routers
 app.include_router(links_router)
+app.include_router(matches_router)
 
 # Register exception handlers
 register_exception_handlers(app=app)
@@ -30,4 +32,6 @@ async def read_root() -> dict[str, str]:
     dict[str, str]
         Welcome message.
     """
-    return {"message": "Welcome to the Players API!"}
+    # TODO: use this root endpoint to provide more information about the API and how
+    # to use it.
+    return {"message": "Welcome to the pyFanta API!"}
