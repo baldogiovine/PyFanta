@@ -32,4 +32,6 @@ async def read_root() -> dict[str, str]:
     dict[str, str]
         Welcome message.
     """
+    # TODO: use this root endpoint to provide more information about the API and how
+    # to use it.
     return {"message": "Welcome to the pyFanta API!"}

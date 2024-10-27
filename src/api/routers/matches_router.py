@@ -1,6 +1,6 @@
 """Module to define a router to get matches stats."""
 
-from typing import no_type_check
+from typing import Dict, List, Union, no_type_check
 
 from fastapi import APIRouter
 
@@ -22,7 +22,8 @@ async def get_matches_stats(player_link: PlayerLink) -> MatchesStatsResponse:
 
     Parameters
     ----------
-
+    player_link: PlayerLink
+        Input object containing the player's name and link.
 
     Returns:
     -------
@@ -33,7 +34,7 @@ async def get_matches_stats(player_link: PlayerLink) -> MatchesStatsResponse:
 
     await scraper.scrape_all()
 
-    data = {
+    data: Dict[str, List[Union[int, float, str, None]]] = {
         "name": scraper.name,
         "game_day": scraper.game_day,
         "grade": scraper.grade,
