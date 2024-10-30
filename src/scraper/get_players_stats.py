@@ -1,7 +1,7 @@
 """Module to get players' stats."""
 
 import asyncio
-from typing import NamedTuple, Union
+from typing import List, NamedTuple, Union
 
 import aiohttp
 from bs4 import BeautifulSoup
@@ -60,6 +60,8 @@ class GetPlayerSummaryStats:
         self.soup: Union[BeautifulSoup, None] = None
         self.avg_grade: Union[float, None] = None
         self.avg_fanta_grade: Union[float, None] = None
+        self.median_grade: Union[float, None] = None
+        self.median_fanta_grade: Union[float, None] = None
         self.role: Union[str, None] = None
         self.mantra_role: Union[str, None] = None
         self.graded_matches: Union[int, None] = None
@@ -77,6 +79,7 @@ class GetPlayerSummaryStats:
         self.description: Union[str, None] = None
 
     async def fetch_page(self) -> None:  # FIXME: it repeated from GetMatchesStats
+        # maybe do a common class from which they
         """Asynchronously fetches the page content and parse it with BeautifulSoup."""
         try:
             async with aiohttp.ClientSession() as session:
@@ -113,6 +116,38 @@ class GetPlayerSummaryStats:
         self.avg_fanta_grade = avg_fanta_grade
 
         return self.avg_fanta_grade
+
+    @check_for_soup
+    async def get_median_grade(self) -> Union[float, None]:
+        """Gets the median grade obtained by a player."""
+        grades: List[Union[float, None]] = []
+        assert isinstance(self.soup, BeautifulSoup)
+        for span in self.soup.find_all("span", class_="grade"):
+            grade: Union[float, None] = utils.str_to_none(
+                str_to_replace=span.get("data-value")
+            )
+            assert isinstance(grade, float) or grade is None
+            grades.append(grade)
+        median_grade: Union[float, None] = utils.safe_median(grades)
+        self.median_grade = median_grade
+
+        return self.median_grade
+
+    @check_for_soup
+    async def get_medianfanta_grade(self) -> Union[float, None]:
+        """Gets the median fanta_grade obtained by a player."""
+        fanta_grades: List[Union[float, None]] = []
+        assert isinstance(self.soup, BeautifulSoup)
+        for span in self.soup.find_all("span", class_="fanta-grade"):
+            fanta_grade: Union[float, None] = utils.str_to_none(
+                str_to_replace=span.get("data-value")
+            )
+            assert isinstance(fanta_grade, float) or fanta_grade is None
+            fanta_grades.append(fanta_grade)
+        median_fanta_grade: Union[float, None] = utils.safe_median(fanta_grades)
+        self.median_fanta_grade = median_fanta_grade
+
+        return self.median_fanta_grade
 
     @check_for_soup
     async def get_role(self) -> str:

@@ -1,7 +1,8 @@
 """Module to define some general utility functions."""
 
 from functools import wraps
-from typing import Any, Awaitable, Callable, TypeVar, Union
+from statistics import median
+from typing import Any, Awaitable, Callable, List, TypeVar, Union
 
 from src.scraper.exceptions import PageStructureError
 
@@ -79,3 +80,28 @@ def check_for_soup(func: F) -> F:
             ) from e
 
     return wrapper  # type: ignore
+
+
+def safe_median(data: List[Union[int, float, None]]) -> Union[float, None]:
+    """Returns the median value of list of `int` and/or `float` without returning an
+    error is a `None` value is present in the list.
+
+    Parameters
+    ----------
+    data : List[Union[int, float, None]]
+        List of `int`  and/or `float`. List can contain `None` values.
+
+    Returns:
+    -------
+    Union[float, None]
+        Median value. Returns `None` is all value in the list are `None`.
+    """  # noqa: D205
+    assert isinstance(data, list)
+    filtered_data: List[Union[int, float]] = [d for d in data if d is not None]
+    if not filtered_data:
+        return None
+    median_value: Union[int, float] = median(filtered_data)
+    median_value = float(median_value)
+    assert isinstance(median_value, float)
+
+    return median_value
