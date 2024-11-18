@@ -52,3 +52,4 @@ references
 #Exceptions
 src/scraper/reference.py
 src/fake_client.py
+src/scraper/backup_get_players_stats.py
