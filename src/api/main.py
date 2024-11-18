@@ -7,9 +7,10 @@ from fastapi import FastAPI
 from src.api.exceptions import register_exception_handlers
 from src.api.routers.links_router import router as links_router
 from src.api.routers.matches_router import router as matches_router
+from src.api.routers.players_router import router as players_router
 
 app = FastAPI(
-    title="Players API",
+    title="pyFanta API",
     description="An API to get players' information for the fantacalcio.",
     version="1.0.0",
 )
@@ -17,6 +18,7 @@ app = FastAPI(
 # Include routers
 app.include_router(links_router)
 app.include_router(matches_router)
+app.include_router(players_router)
 
 # Register exception handlers
 register_exception_handlers(app=app)

@@ -13,45 +13,7 @@ from src.scraper.exceptions import FetchError
 from src.scraper.utils import check_for_soup
 
 
-class GradedMatchesGoalsAssistsTuple(NamedTuple):
-    """NamedTuple.
-
-    Where:
-    - [0] = graded_matches: int
-    - [1] = goals: int
-    - [2] = assists: int
-    """
-
-    graded_matches: int
-    goals: int
-    assists: int
-
-
-class GoalsInfoPenaltiesInfoCardsInfoTuple(NamedTuple):
-    """NamedTuple.
-
-    Where:
-    - [0] = home_game_goals: int
-    - [1] = away_game_goals: int
-    - [2] = penalties_scored: int
-    - [3] = penalties_shot: int
-    - [4] = penalties_ratio: Union[float, None]
-    - [5] = autogoals: int
-    - [6] = yellow_cards: int
-    - [7] = red_cards: int
-    """
-
-    home_game_goals: int
-    away_game_goals: int
-    penalties_scored: int
-    penalties_shot: int
-    penalties_ratio: Union[float, None]
-    autogoals: int
-    yellow_cards: int
-    red_cards: int
-
-
-class GetPlayerSummaryStats:
+class BasePlayerSummaryStats:
     """Class to scrpae a player summary statistics in a specific seasons."""
 
     def __init__(self, player_link: PlayerLink):  # noqa: D107
@@ -64,22 +26,12 @@ class GetPlayerSummaryStats:
         self.median_fanta_grade: Union[float, None] = None
         self.role: Union[str, None] = None
         self.mantra_role: Union[str, None] = None
-        self.graded_matches: Union[int, None] = None
-        self.goals: Union[int, None] = None
-        self.assists: Union[int, None] = None
-        self.home_game_goals: Union[int, None] = None
-        self.away_game_goals: Union[int, None] = None
-        self.penalties_scored: Union[int, None] = None
-        self.penalties_shot: Union[int, None] = None
-        self.penalties_ratio: Union[float, None] = None
-        self.autogoals: Union[int, None] = None
-        self.yellow_cards: Union[int, None] = None
-        self.red_cards: Union[int, None] = None
         self.team: Union[str, None] = None
         self.description: Union[str, None] = None
 
-    async def fetch_page(self) -> None:  # FIXME: it repeated from GetMatchesStats
-        # maybe do a common class from which they
+    async def fetch_page(self) -> None:
+        # FIXME: this method is repeated from GetMatchesStats make a common class from
+        # which they can inherit
         """Asynchronously fetches the page content and parse it with BeautifulSoup."""
         try:
             async with aiohttp.ClientSession() as session:
@@ -134,7 +86,7 @@ class GetPlayerSummaryStats:
         return self.median_grade
 
     @check_for_soup
-    async def get_medianfanta_grade(self) -> Union[float, None]:
+    async def get_median_fanta_grade(self) -> Union[float, None]:
         """Gets the median fanta_grade obtained by a player."""
         fanta_grades: List[Union[float, None]] = []
         assert isinstance(self.soup, BeautifulSoup)
@@ -172,6 +124,109 @@ class GetPlayerSummaryStats:
         self.mantra_role = mantra_role
 
         return self.mantra_role
+
+    @check_for_soup
+    async def get_team(self) -> str:
+        """Get team of the player."""
+        assert isinstance(self.soup, BeautifulSoup)
+        a: ResultSet[Tag] = self.soup.find_all("a", class_="team-name team-link")
+        assert isinstance(a, ResultSet)
+        first_tag: Tag = a[0]
+        assert isinstance(first_tag, Tag)
+        meta: Tag = first_tag.find("meta")
+        assert isinstance(meta, Tag)
+        team: str = meta.get("content")
+        assert isinstance(team, str)
+        self.team = team
+
+        return self.team
+
+    @check_for_soup
+    async def get_description(self) -> str:
+        """Get  description of the player."""
+        assert isinstance(self.soup, BeautifulSoup)
+        div: Tag = self.soup.find("div", class_="description")
+        assert isinstance(div, Tag)
+        description: str = div.text.strip()
+        assert isinstance(description, str)
+        self.description = description
+
+        return self.description
+
+    async def scrape_common_stats(self) -> None:
+        """Scrapes common stats shared by all players independently from the role."""
+        await self.fetch_page()
+
+        await self.get_avg_grade()
+        await self.get_avg_fanta_grade()
+        await self.get_median_grade()
+        await self.get_median_fanta_grade()
+        await self.get_role()
+        await self.get_mantra_role()
+        await self.get_team()
+        await self.get_description()
+
+
+class GradedMatchesGoalsAssistsTuple(NamedTuple):
+    """NamedTuple.
+
+    Where:
+    - [0] = graded_matches: int
+    - [1] = goals: int
+    - [2] = assists: int
+    """
+
+    graded_matches: int
+    goals: int
+    assists: int
+
+
+class GoalsInfoPenaltiesInfoCardsInfoTuple(NamedTuple):
+    """NamedTuple.
+
+    Where:
+    - [0] = home_game_goals: int
+    - [1] = away_game_goals: int
+    - [2] = penalties_scored: int
+    - [3] = penalties_shot: int
+    - [4] = penalties_ratio: Union[float, None]
+    - [5] = autogoals: int
+    - [6] = yellow_cards: int
+    - [7] = red_cards: int
+    """
+
+    home_game_goals: int
+    away_game_goals: int
+    penalties_scored: int
+    penalties_shot: int
+    penalties_ratio: Union[float, None]
+    autogoals: int
+    yellow_cards: int
+    red_cards: int
+
+
+class GetOufieldPlayerSummaryStats(BasePlayerSummaryStats):
+    """Class to scrape Outfield players summary stats.
+
+    Outfield players are:
+    - attackers
+    - midfilders
+    - defenders
+    """
+
+    def __init__(self, player_link: PlayerLink):  # noqa: D107
+        super().__init__(player_link)
+        self.graded_matches: Union[int, None] = None
+        self.goals: Union[int, None] = None
+        self.assists: Union[int, None] = None
+        self.home_game_goals: Union[int, None] = None
+        self.away_game_goals: Union[int, None] = None
+        self.penalties_scored: Union[int, None] = None
+        self.penalties_shot: Union[int, None] = None
+        self.penalties_ratio: Union[float, None] = None
+        self.autogoals: Union[int, None] = None
+        self.yellow_cards: Union[int, None] = None
+        self.red_cards: Union[int, None] = None
 
     @check_for_soup
     async def get_graded_matches_goals_assists(self) -> GradedMatchesGoalsAssistsTuple:
@@ -255,30 +310,136 @@ class GetPlayerSummaryStats:
             red_cards,
         )
 
+    async def scrape_all(self) -> None:
+        """Scrapes all stats for outfield players."""
+        await self.scrape_common_stats()
+        await self.get_graded_matches_goals_assists()
+        await self.get_goals_info_penalties_info_cards_info()
+
+
+class GradedMatchesGoalsConcededAssistsTuple(NamedTuple):
+    """NamedTuple.
+
+    Where:
+    - [0] = graded_matches: int
+    - [1] = goals: int
+    - [2] = assists: int
+    """
+
+    graded_matches: int
+    goals_conceded: int
+    assists: int
+
+
+class GoalsConcededPenaltiesSavedInfoCardsInfoTuple(NamedTuple):
+    """NamedTuple.
+
+    Where:
+    - [0] = home_game_goals_conceded: int
+    - [1] = away_game_goals_conceded: int
+    - [2] = penalties_saved: int
+    - [3] = autogoals: int
+    - [4] = yellow_cards: int
+    - [5] = red_cards: int
+    """
+
+    home_game_goals_conceded: int
+    away_game_goals_conceded: int
+    penalties_saved: int
+    autogoals: int
+    yellow_cards: int
+    red_cards: int
+
+
+class GetGoalkeeperSummaryStats(BasePlayerSummaryStats):
+    """Class to scrape goalkeepers summary stats."""
+
+    def __init__(self, player_link: PlayerLink):  # noqa: D107
+        super().__init__(player_link)
+        self.graded_matches: Union[int, None] = None
+        self.goals_conceded: Union[int, None] = None
+        self.assists: Union[int, None] = None
+        self.home_game_goals_conceded: Union[int, None] = None
+        self.away_game_goals_conceded: Union[int, None] = None
+        self.penalties_saved: Union[int, None] = None
+        self.autogoals: Union[int, None] = None
+        self.yellow_cards: Union[int, None] = None
+        self.red_cards: Union[int, None] = None
+
     @check_for_soup
-    async def get_team(self) -> str:
-        """Get team of the player."""
+    async def get_graded_matches_goals_conceded_assists(
+        self,
+    ) -> GradedMatchesGoalsConcededAssistsTuple:
+        """Gets graded matches, goals, and assists."""
         assert isinstance(self.soup, BeautifulSoup)
-        a: ResultSet[Tag] = self.soup.find_all("a", class_="team-name team-link")
-        assert isinstance(a, ResultSet)
-        first_tag: Tag = a[0]
-        assert isinstance(first_tag, Tag)
-        meta: Tag = first_tag.find("meta")
-        assert isinstance(meta, Tag)
-        team: str = meta.get("content")
-        assert isinstance(team, str)
-        self.team = team
+        td: ResultSet[Tag] = self.soup.find_all("td", class_="value")
+        assert isinstance(td, ResultSet)
 
-        return self.team
+        graded_matches = int(td[0].text)
+        assert isinstance(graded_matches, int)
+        self.graded_matches = graded_matches
+
+        goals_conceded = int(td[1].text)
+        assert isinstance(goals_conceded, int)
+        self.goals_conceded = goals_conceded
+
+        assists = int(td[2].text)
+        assert isinstance(assists, int)
+        self.assists = assists
+
+        return GradedMatchesGoalsConcededAssistsTuple(
+            self.graded_matches,
+            self.goals_conceded,
+            self.assists,
+        )
 
     @check_for_soup
-    async def get_description(self) -> str:
-        """Get  description of the player."""
+    async def get_goals_conceded_penalties_saved_info_cards_info(
+        self,
+    ) -> GoalsConcededPenaltiesSavedInfoCardsInfoTuple:
+        """Gets information about goals, penalties, autogoals, and cards."""
         assert isinstance(self.soup, BeautifulSoup)
-        div: Tag = self.soup.find("div", class_="description")
-        assert isinstance(div, Tag)
-        description: str = div.text.strip()
-        assert isinstance(description, str)
-        self.description = description
+        span: ResultSet[Tag] = self.soup.find_all("span", class_="pill")
+        assert isinstance(span, ResultSet)
 
-        return self.description
+        home_game_goals_conceded, away_game_goals_conceded = span[0].text.split("/")
+        assert isinstance(home_game_goals_conceded, str)
+        assert isinstance(away_game_goals_conceded, str)
+        home_game_goals_conceded = int(home_game_goals_conceded)
+        assert isinstance(home_game_goals_conceded, int)
+        self.home_game_goals_conceded = home_game_goals_conceded
+        away_game_goals_conceded = int(away_game_goals_conceded)
+        assert isinstance(away_game_goals_conceded, int)
+        self.away_game_goals_conceded = away_game_goals_conceded
+
+        penalties_saved: Union[str, int] = span[2].text
+        assert isinstance(penalties_saved, str) or isinstance(penalties_saved, int)
+        penalties_saved = int(penalties_saved)
+        assert isinstance(penalties_saved, int)
+        self.penalties_saved = penalties_saved
+
+        autogoals: int = int(span[4].text)
+        assert isinstance(autogoals, int)
+        self.autogoals = autogoals
+
+        yellow_cards: int = int(span[1].text)
+        assert isinstance(yellow_cards, int)
+        self.yellow_cards = yellow_cards
+        red_cards: int = int(span[3].text)
+        assert isinstance(red_cards, int)
+        self.red_cards = red_cards
+
+        return GoalsConcededPenaltiesSavedInfoCardsInfoTuple(
+            home_game_goals_conceded,
+            away_game_goals_conceded,
+            penalties_saved,
+            autogoals,
+            yellow_cards,
+            red_cards,
+        )
+
+    async def scrape_all(self) -> None:
+        """Scrapes all stats for goalkeepers."""
+        await self.scrape_common_stats()
+        await self.get_graded_matches_goals_conceded_assists()
+        await self.get_goals_conceded_penalties_saved_info_cards_info()

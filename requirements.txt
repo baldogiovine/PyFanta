@@ -2,6 +2,7 @@ aiohttp
 beautifulsoup4
 fastapi[standard]
 numpy
+openpyxl
 pandas
 pydantic
 requests
