@@ -1,6 +1,6 @@
 pyFanta License
 
-Copyright 2024 ([baldogiovine](https://github.com/baldogiovine))
+Copyright 2024 [baldogiovine](https://github.com/baldogiovine)
 
 License Agreement
 
