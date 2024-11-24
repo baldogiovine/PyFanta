@@ -8,9 +8,9 @@
         <a href="https://github.com/baldogiovine/PyFanta/actions/workflows/ci.yml" target="_blank">
             <img src="https://github.com/baldogiovine/PyFanta/actions/workflows/ci.yml/badge.svg" alt="CI Pipeline status">
         </a>
-        <a href="https://github.com/baldogiovine/PyFanta/releases" target="_blank">
+        <!-- <a href="https://github.com/baldogiovine/PyFanta/releases" target="_blank">
             <img src="https://img.shields.io/github/v/release/baldogiovine/PyFanta?label=Latest%20Release" alt="Latest release">
-        </a>
+        </a> -->
         <a href="https://github.com/baldogiovine/PyFanta" target="_blank">
             <img src="https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue" alt="Python version">
         </a>
@@ -20,20 +20,140 @@
         <a href="https://github.com/astral-sh/ruff" target="_blank">
             <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff">
         </a>
+        <a href="http://www.mypy-lang.org/" target="_blank">
+            <img src="https://img.shields.io/badge/mypy-checked-blue" alt="mypy">
+        </a>
     </p>
 </div>
 
+## What is it?
+**pyFanta** is a scraper wrapped in a [FastAPI](https://github.com/fastapi/fastapi) application that helps you extract data from [Leghe Fantacalcio](https://www.fantacalcio.it).
 
-## Getting started
+Its purpose is to assist you with your fantacalcio auctions and repair auctions, offering support in choosing your weekly lineup.
 
-### Installation
+## Disclaimer
 
-```pip install -r requirements-dev.txt```
+This tool is intended solely and exclusively for personal, educational, recreational, non-commercial, and non-profit uses and purposes.
 
-### Quickstart
-bla bla bla
+Users are responsible for ensuring that their use of this tool complies with all applicable laws and the terms of service of the [website](https://www.fantacalcio.it) they interact with. The author does not condone or support any misuse of this tool.
 
+Before using the Code, plese carefully read the [`pyFanta Licencse`](LICENSE)
+
+## Table of Contents
+- [PyFanta](#pyfanta)
+  - [What is it?](#what-is-it)
+  - [Disclaimer](#disclaimer)
+  - [Table of Contents](#table-of-contents)
+  - [Currently implemented features](#currently-implemented-features)
+  - [Installation](#installation)
+  - [Quickstart](#quickstart)
+  - [API documentation](#api-documentation)
+  - [Releases](#releases)
+  - [Known bugs](#known-bugs)
+  - [License](#license)
+  - [Support](#support)
+  - [Credits](#credits)
+
+## Currently implemented features
+Here is a list of currently implemented features:
+- **Player Match Statistics**: API endpoint to scrape performance data of all players in all matches for a specific season. | Endpoint: `/v1/matches-stats`
+- **Outfield Player Summary**: API endpoint to scrape overall statistics of outfield players (attackers, midfielders, defenders) in a season. | Endpoint: `/v1/player-summary-stats/outfield`
+- **Goalkeeper Summary**: API endpoint to scrape overall statistics of goalkeepers in a season. | Endpoint: `/v1/player-summary-stats/goalkeeper`
+
+Important notes:
+- Currently only `Serie A` league is implemented.
+- Once started up, the API will be locally hosted on your machine. Currently there is no implementation to host the API on a port other then `8000`.
+
+[Back to Table of Contents](#table-of-contents)
+
+## Installation
+To make use of **pyFanta** API, follow the indicated steps to clone the repository and the install the required packages.
+
+Clone the repository:
+```
+git clone https://github.com/baldogiovine/PyFanta.git
+```
+
+Navigate to the project directory:
+```
+cd PyFanta
+```
+
+Create a virtual environment (optional):
+```
+python3 -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+```
+
+Install required packages:
+```
+pip install -r requirements.txt
+```
+
+[Back to Table of Contents](#table-of-contents)
+
+## Quickstart
+To start up **pyFanta** API, follow the indicated steps to start the FastAPI server:
+
+Navigate to the project directory:
+```
+cd PyFanta
+```
+
+Start the FastAPI server:
+```
+uvicorn src.api.main:app
+```
+
+```uvicorn src.api.main:app --reload``` can be used instead of ```uvicorn src.api.main:app``` to enable auto-reloading of the server when code changes.
+
+Running ```python3 -m src.client``` will execute the client code and download in the `data` folder all Serie A mathces, outfield players, and goalpeers information for season `2024-25` both in `json` and `csv` format.
+
+To scrape data about other seasons access `src.client.py` and modify the value of the `YEAR` constant from `2024-25` to, for example, `2023-24`.
+
+For more details on current issues, please refer to the [Known Bugs](#known-bugs) section.
+
+[Back to Table of Contents](#table-of-contents)
+
+## API documentation
+Once the [API is up an runing](#quickstart), you can access the following link to visualize the API documentation:
+
+```https://127.0.0.1:8000/docs```
+
+This will open the interactive API documentation generated by [Swagger UI](https://swagger.io/tools/swagger-ui/), allowing you to explore and test the endpoints.
+
+
+[Back to Table of Contents](#table-of-contents)
+
+## Releases
+Check out [CHANGELOG.md](CHANGELOG.md) to stay updated on new releases, features, and bug fixes!
+
+[Back to Table of Contents](#table-of-contents)
+
+## Known bugs
+Currently, there's a known bug related to the players' match information from the `/v1/matches-stats` endpoint. The data is not outputted in the desired format suitable for time series forecasting models.
+
+For updates, please check the [Releases](#releases) section.
+
+[Back to Table of Contents](#table-of-contents)
+
+## License
+This project is licensed under the **PyFanta License**. See the [LICENSE](LICENSE) file for details.
+
+[Back to Table of Contents](#table-of-contents)
+
+## Support
+
+If you encounter any issues or have questions, please open an [issue](https://github.com/baldogiovine/PyFanta/issues) on GitHub.
+
+[Back to Table of Contents](#table-of-contents)
 
 ## Credits
 
-Author: [baldogiovine](https://github.com/baldogiovine)
+**Author:**
+- [baldogiovine](https://github.com/baldogiovine)
+
+**Acknowledgments**:
+- [Leghe Fantacalcio](https://www.fantacalcio.it) for the data source.
+
+[Back to Table of Contents](#table-of-contents)

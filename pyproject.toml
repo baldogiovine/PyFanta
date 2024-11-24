@@ -1,5 +1,6 @@
 [project]
 name = "PyFanta"
+version = "0.1.0"
 authors = [
     {name = "baldogiovine"}
 ]
@@ -7,7 +8,7 @@ readme = "README.md"
 description = "<An API to scrape Fantacalcio data.>"
 requires-python = ">=3.9"
 dependencies = [
-	
+
 ]
 
 
@@ -16,21 +17,52 @@ convention = "google"
 
 [tool.ruff]
 line-length = 88
-select = ["E", "F"]
-ignore = ["E501"]
+
 target-version = "py39"
 extend-exclude = ["data", "experimental", "deprecated"]
 
 [tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]
 extend-select = [
-	"B", "Q", "I",
+    "B", "Q", "I",
     "D",   # pydocstyle
-	"PL" # pylint
+    "PL"   # pylint
 ]
 
 [tool.ruff.format]
-# Enable reformatting of code snippets in docstrings.
 docstring-code-format = true
+
+[tool.mypy]
+plugins = [
+  "pydantic.mypy"
+]
+mypy_path = ["stubs"]
+incremental = true
+strict = true
+python_version = "3.9"
+exclude = [
+    "tests/",
+    "docs/",
+]
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_reexport = true
+disallow_untyped_defs = true
+
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+
+# Enable automatic installation of missing type stubs
+install_types = true
+non_interactive = true
 
 [tool.coverage.run]
 omit = [

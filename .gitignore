@@ -3,6 +3,8 @@
 __pycache__
 *.pytest_cache
 *.coverage
+.ruff_cache
+.mypy_cache
 
 # Data files
 *.csv
@@ -48,3 +50,6 @@ notebooks
 references
 
 #Exceptions
+src/scraper/reference.py
+src/fake_client.py
+src/scraper/backup_get_players_stats.py
