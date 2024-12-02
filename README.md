@@ -32,12 +32,13 @@
 Its purpose is to assist you with your fantacalcio auctions and repair auctions, offering support in choosing your weekly lineup.
 
 ## Disclaimer
-
 This tool is intended solely and exclusively for personal, educational, recreational, non-commercial, and non-profit uses and purposes.
+
+Please be considerate with the rate at which you send requests to the website. Excessive or rapid requests can place unnecessary strain on the website's servers, potentially leading to service disruptions for other users or triggering anti-scraping measures.
 
 Users are responsible for ensuring that their use of this tool complies with all applicable laws and the terms of service of the [website](https://www.fantacalcio.it) they interact with. The author does not condone or support any misuse of this tool.
 
-Before using the Code, plese carefully read the [`pyFanta Licencse`](LICENSE)
+Before using the Code, please carefully read the [`pyFanta Licencse`](LICENSE)
 
 ## Table of Contents
 - [PyFanta](#pyfanta)
@@ -47,6 +48,7 @@ Before using the Code, plese carefully read the [`pyFanta Licencse`](LICENSE)
   - [Currently implemented features](#currently-implemented-features)
   - [Installation](#installation)
   - [Quickstart](#quickstart)
+  - [Running with Docker](#running-with-docker)
   - [API documentation](#api-documentation)
   - [Releases](#releases)
   - [Known bugs](#known-bugs)
@@ -112,6 +114,30 @@ Running ```python3 -m src.client``` will execute the client code and download in
 To scrape data about other seasons access `src.client.py` and modify the value of the `YEAR` constant from `2024-25` to, for example, `2023-24`.
 
 For more details on current issues, please refer to the [Known Bugs](#known-bugs) section.
+
+[Back to Table of Contents](#table-of-contents)
+
+## Running with Docker
+A packaged version of the **pyFanta** API is offered through a [Docker](https://www.docker.com/) image. It's possible to interact with the packaged version of the **pyFanta** API in various ways. For example, you can create a Docker container from the image and interact with the API using tools like [Postman](https://www.postman.com/downloads/).
+
+To build the Docker image and create a container from it, follow the below instructions.
+
+Navigate to the project directory:
+```
+cd PyFanta
+```
+
+Build the Docker image using the [Dockerfile](Dockerfile) in the [repository](https://github.com/baldogiovine/PyFanta):
+```
+docker build -t pyfanta .
+```
+
+Create and run the container:
+```
+docker run -d -p 8000:8000 pyfanta
+```
+
+Once the container is running, you can access the **pyFanta** API at [http://localhost:8000](http://localhost:8000). To explore the API documentation and test endpoints, visit [http://localhost:8000/docs](http://localhost:8000/docs).
 
 [Back to Table of Contents](#table-of-contents)
 
