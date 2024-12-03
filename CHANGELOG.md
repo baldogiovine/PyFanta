@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - There is a known bug related to players matches information. Data coming out of `v1/matches-stats` endpoint are not outputted in the desired format. Which should be a format that can potentially allow to easily take these data as input in a time series forecasting model.
 
+## [0.2.0] - in developement
+
+### Added
+- Docker implementation to run packaged version of the API. ([commit `f8ca14d`](https://github.com/baldogiovine/PyFanta/commit/f8ca14d0d86fb424a8b591cca59b8949b1f0ac18))
+
+
+
 ## [0.1.0] - 2024-11-24
 
 ### Added
