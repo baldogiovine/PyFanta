@@ -18,8 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Docker implementation to run packaged version of the API. ([commit `f8ca14d`](https://github.com/baldogiovine/PyFanta/commit/f8ca14d0d86fb424a8b591cca59b8949b1f0ac18))
 
-
-
 ## [0.1.0] - 2024-11-24
 
 ### Added
