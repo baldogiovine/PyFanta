@@ -196,7 +196,7 @@ class GetMatchesStats:
         """
         guest_teams: List[str] = []
         assert isinstance(self.soup, BeautifulSoup)
-        for span in self.soup.find_all("span", class_="team-home")[
+        for span in self.soup.find_all("span", class_="team-away")[
             :-2
         ]:  # [:-2] removes two inexisting matches
             assert isinstance(span, Tag)
@@ -221,7 +221,7 @@ class GetMatchesStats:
         home_team_scores: List[int] = []
         guest_team_scores: List[int] = []
         assert isinstance(self.soup, BeautifulSoup)
-        for span in self.soup.find_all("span", class_="match-score")[:-2]:
+        for span in self.soup.find_all("span", class_="match-score"):
             assert isinstance(span, Tag)
             match_score: str = span.text.strip()
             assert isinstance(match_score, str)
