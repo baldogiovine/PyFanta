@@ -67,13 +67,24 @@ class GetPlayersLinks:
             links: List[Tag] = table.find_all("a", class_="player-name player-link")
             assert isinstance(links, List)
 
-            data: List[Dict[str, str]] = [
-                {
+            data: List[Dict[str, str]] = []
+            for link in links:
+                player_dict: Dict[str, str] = {
                     "name": link.get_text(separator="\n", strip=True),
                     "link": self.__get_attribute_as_str(tag=link, attr_name="href"),
                 }
-                for link in links
-            ]
+                assert isinstance(player_dict, Dict)
+                assert (
+                    isinstance(player_dict.get("name"), str)
+                    and player_dict.get("name") is not None
+                )
+                assert (
+                    isinstance(player_dict.get("link"), str)
+                    and player_dict.get("link") is not None
+                )
+                if player_dict.get("link")[-7:] != self.year:  # type: ignore
+                    player_dict["link"] = f'{player_dict.get("link")}/{self.year}'
+                data.append(player_dict)
             return data
         except AttributeError as e:
             raise PageStructureError(
