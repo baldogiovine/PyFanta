@@ -1,6 +1,6 @@
 """Module to define a router to get matches stats."""
 
-from typing import Dict, List, Union, no_type_check
+from typing import no_type_check
 
 from fastapi import APIRouter
 
@@ -34,19 +34,35 @@ async def get_matches_stats(player_link: PlayerLink) -> MatchesStatsResponse:
 
     await scraper.scrape_all()
 
-    data: Dict[str, List[Union[int, float, str, None]]] = {
-        "name": scraper.name,
-        "game_day": scraper.game_day,
-        "grade": scraper.grade,
-        "fanta_grade": scraper.fanta_grade,
-        "bonus": scraper.bonus,
-        "malus": scraper.malus,
-        "home_team": scraper.home_team,
-        "guest_team": scraper.guest_team,
-        "home_team_score": scraper.home_team_score,
-        "guest_team_score": scraper.guest_team_score,
-        "subsitution_in": scraper.sub_in,
-        "subsitution_out": scraper.sub_out,
-    }
+    name = scraper.name
+    game_days = scraper.game_day
+    grades = scraper.grade
+    fanta_grades = scraper.fanta_grade
+    bonuses = scraper.bonus
+    maluses = scraper.malus
+    home_teams = scraper.home_team
+    guest_teams = scraper.guest_team
+    home_team_scores = scraper.home_team_score
+    guest_team_scores = scraper.guest_team_score
+    subs_in = scraper.sub_in
+    subs_out = scraper.sub_out
 
-    return MatchesStatsResponse(data=data)
+    rows = []
+    for i in range(len(game_days)):
+        row = {
+            "name": name,
+            "game_day": game_days[i],
+            "grade": grades[i],
+            "fanta_grade": fanta_grades[i],
+            "bonus": bonuses[i],
+            "malus": maluses[i],
+            "home_team": home_teams[i],
+            "guest_team": guest_teams[i],
+            "home_team_score": home_team_scores[i],
+            "guest_team_score": guest_team_scores[i],
+            "subsitution_in": subs_in[i],
+            "subsitution_out": subs_out[i],
+        }
+        rows.append(row)
+
+    return MatchesStatsResponse(data=rows)

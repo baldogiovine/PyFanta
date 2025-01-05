@@ -338,13 +338,21 @@ if __name__ == "__main__":
         goalkeepers_summary_data_json,
     ]
     for file_path in json_files:
-        with open(file_path, "r", encoding="utf-8") as file:
-            data = json.load(file)
-        open_json: List[Any] = [
-            entry["data"]
-            for entry in data["data"]  # type: ignore
-            if "data" in entry
-        ]
+        if file_path == matches_data_json:
+            with open(file_path, "r", encoding="utf-8") as file:
+                data = json.load(file)
+            open_json: List[Any] = []
+            for entry in data["data"]:  # type: ignore
+                if "data" in entry:
+                    open_json.extend(entry["data"])
+        else:
+            with open(file_path, "r", encoding="utf-8") as file:
+                data = json.load(file)
+            open_json: List[Any] = [  # type: ignore
+                entry["data"]
+                for entry in data["data"]  # type: ignore
+                if "data" in entry
+            ]
         df: DataFrame = pd.DataFrame(open_json)
         output_file: Path = file_path.with_suffix(".xlsx")
         df.to_excel(output_file, index=False)

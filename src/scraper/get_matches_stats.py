@@ -267,7 +267,7 @@ class GetMatchesStats:
     async def get_minute_out(self) -> List[Union[float, None]]:
         """Gets minute a player exited the field as a substitution.
 
-        If `np.nan` it can mean that a player never exited the field or that
+        If `np.nan` it can mean that a player never existed the field or that
         he didn' t play at all. But looking if a fantagrade is available will tell you
         if the player played or not.
 
