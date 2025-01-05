@@ -25,5 +25,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API endpoint to scrape overall information of outfield players (attackers, midfilders, and defenders) in a season. | `v1/player-summary-stats/outfield` endpoint
 - API endpoint to scrape overall information of goalkeepers in a season. | `v1/player-summary-stats/goalkeper` endpoint
 
-[0.2.0]: https://github.com/baldogiovine/PyFanta/compare/v0.2.0...v0.1.0
+[0.2.0]: https://github.com/baldogiovine/PyFanta/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/baldogiovine/PyFanta/releases/tag/v0.1.0
