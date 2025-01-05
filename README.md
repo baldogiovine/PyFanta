@@ -52,7 +52,6 @@ Before using the Code, please carefully read the [`pyFanta Licencse`](LICENSE)
   - [API documentation](#api-documentation)
     - [Requests examples](#requests-examples)
   - [Releases](#releases)
-  - [Known bugs](#known-bugs)
   - [License](#license)
   - [Support](#support)
   - [Credits](#credits)
@@ -216,13 +215,6 @@ Once you have a `PlayerLink` object, you can use it to query other endpoints. Fo
 
 ## Releases
 Check out [CHANGELOG.md](CHANGELOG.md) to stay updated on new releases, features, and bug fixes!
-
-[Back to Table of Contents](#table-of-contents)
-
-## Known bugs
-Currently, there's a known bug related to the players' match information from the `/v1/matches-stats` endpoint. The data is not outputted in the desired format suitable for time series forecasting models.
-
-For updates, please check the [Releases](#releases) section.
 
 [Back to Table of Contents](#table-of-contents)
 

@@ -12,7 +12,7 @@ from src.api.routers.players_router import router as players_router
 app = FastAPI(
     title="pyFanta API",
     description="An API to get players' information for the fantacalcio.",
-    version="1.0.0",
+    version="0.1.1",
 )
 
 # Include routers
