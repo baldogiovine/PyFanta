@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a known bug related to players matches information. Data coming out of `v1/matches-stats` endpoint were not outputted in the desired format. ([PR #14](https://github.com/baldogiovine/PyFanta/pull/14))
 - Fixed home_team and guest_team in `GetMatchesStats` returning the same output. ([PR #13](https://github.com/baldogiovine/PyFanta/pull/13))
 - Fixed `home_team_score` and `guest_team_score` fetching two observations less compared to the number of game_days. ([PR #13](https://github.com/baldogiovine/PyFanta/pull/13))
+- Added verions to libraries in `requirements.txt` and `requirements-dev.txt` files. ([PR #14](https://github.com/baldogiovine/PyFanta/pull/14))
 
 ## [0.1.0] - 2024-11-24
 
