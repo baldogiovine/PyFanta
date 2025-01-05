@@ -7,5 +7,5 @@ openpyxl~=3.1.1
 pandas~=1.5.2
 pydantic~=1.10.4
 requests~=2.32.3
-tqdm~=4.64.1
+tqdm~=4.67.1
 uvicorn~=0.20.0
