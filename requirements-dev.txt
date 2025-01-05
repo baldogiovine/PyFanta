@@ -1,10 +1,10 @@
 -r requirements.txt
-pytest==8.2.*
-pytest-cov==5.0.*
-pytest-xdist==3.6.*
-ruff==0.5.*
-pre-commit==3.7.*
-mypy
-types-pydantic
-types-requests
-types-beautifulsoup4
+mypy~=1.11.2
+pre-commit~=3.7.1
+pytest~=8.2.2
+pytest-cov~=5.0.0
+pytest-xdist~=3.6.1
+ruff~=0.5.7
+types-beautifulsoup4~=4.12.0.20240907
+types-requests~=2.32.0.20240914
+types-tqdm~=4.66.0.20240417
