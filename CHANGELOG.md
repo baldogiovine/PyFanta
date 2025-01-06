@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.x.x] - in developement
+
+### Added
+- Streamlit front-end to:
+  - download data (doesn't work),
+  - create, save, and load teams,
+  - show teams fanta_grade line charts.
+
 ## [0.2.1] - 2025-01-05
 
 ### Security
@@ -30,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API endpoint to scrape overall information of outfield players (attackers, midfilders, and defenders) in a season. | `v1/player-summary-stats/outfield` endpoint
 - API endpoint to scrape overall information of goalkeepers in a season. | `v1/player-summary-stats/goalkeper` endpoint
 
+[0.x.x]: https://github.com/baldogiovine/PyFanta/compare/v0.2.1...v0.x.x
 [0.2.1]: https://github.com/baldogiovine/PyFanta/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/baldogiovine/PyFanta/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/baldogiovine/PyFanta/releases/tag/v0.1.0
