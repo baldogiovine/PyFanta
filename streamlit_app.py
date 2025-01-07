@@ -6,12 +6,13 @@ from typing import Dict, List
 import streamlit as st
 from pandas import DataFrame
 
-from frontend.utils import (
+from src.streamlit_helpers import (
+    download_data_from_fastapi_api,
     download_json_in_server,
+    get_default_options,
     get_json_file_names,
     load_matches_dataframe,
     load_players_dataframe,
-    run_python_script,
 )
 
 st.set_page_config(
@@ -28,13 +29,12 @@ if "team_name" not in st.session_state:
 if "loaded_team" not in st.session_state:
     st.session_state.loaded_team = {}
 
-st.title("MATCHES STATS")
+st.title("PYFANTA")
 
 # Download data
 st.title("Download data")
 if st.button(label="Download data"):
-    run_python_script(script_path="src/download_data.py")
-    st.write("\nData downloaded successfully!")
+    download_data_from_fastapi_api()
 
 # Show data
 matches_stats_df: DataFrame = load_matches_dataframe(
@@ -70,27 +70,6 @@ if team_name:
         st.session_state.loaded_team = json.load(file)
 
 st.divider()
-
-
-# Helper to get default options
-def get_default_options(role: str) -> List[str]:
-    """Retrieve default options for a specified role from a loaded team.
-
-    Parameters
-    ----------
-    role : str
-        The role for which to retrieve default options (e.g., "attackers", "defenders").
-
-    Returns:
-    -------
-    List[str]
-        A list of default options (player names) for the given role if available,
-        otherwise an empty list.
-    """
-    if st.session_state.loaded_team and role in st.session_state.loaded_team:
-        assert isinstance(st.session_state.loaded_team[role], List)
-        return st.session_state.loaded_team[role]  # type: ignore
-    return []
 
 
 # Attackers
