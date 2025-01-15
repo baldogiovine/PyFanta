@@ -9,6 +9,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Union
 
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 from pandas import DataFrame
 
@@ -220,3 +222,199 @@ def download_data_from_fastapi_api() -> None:
             st.info("Stopping FastAPI server...")
             stop_fastapi_server(fastapi_process)
             st.success("FastAPI server stopped successfully!")
+
+
+def make_radar_plot(
+    data: pd.DataFrame,
+    players: list[str],
+    categories: List[str],
+) -> None:
+    """Make a radar plot comparing the given players.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        DataFrame containing the data to be plotted.
+    players : list[str]
+        List of player names to be compared.
+    categories : List[str]
+        List of categories to be plotted.
+
+    Returns:
+    -------
+    None
+    """
+    fig = go.Figure()
+    max_values: List[int] = []
+
+    for player in players:
+        player_data: List[float] = (
+            data.query(f"name == '{player}'")[categories].iloc[0].tolist()
+        )
+        max_value: int = int(round(max(player_data), 0)) + 1
+        max_values.append(max_value)
+
+        add_radar_plot_trace(
+            fig=fig,
+            player_data=player_data,
+            categories=categories,
+            player=player,
+        )
+
+    size: int = max(max_values)
+
+    fig.update_layout(
+        polar=dict(
+            radialaxis=dict(
+                visible=True,
+                range=[0, size],
+                tickfont=dict(
+                    color="black",
+                    size=12,
+                ),
+            )
+        ),
+        showlegend=True,
+    )
+
+    st.plotly_chart(fig)
+
+
+# FIXME: fix "'" problem, with names like "n'Dicka"
+def add_radar_plot_trace(
+    fig: go.Figure,
+    player_data: List[float],
+    categories: List[str],
+    player: str,
+) -> go.Figure:
+    """Add a radar plot trace for a player to the given figure.
+
+    Parameters
+    ----------
+    fig : go.Figure
+        The figure to which the radar plot trace will be added.
+    player_data : List[float]
+        A list of data points representing the player's statistics.
+    categories : List[str]
+        A list of category names corresponding to the player's data points.
+    player : str
+        The name of the player being plotted.
+
+    Returns:
+    -------
+    go.Figure
+        The figure with the added radar plot trace for the player.
+    """
+    fig.add_trace(
+        go.Scatterpolar(
+            r=player_data,
+            theta=categories,
+            fill="toself",
+            name=player,
+        )
+    )
+
+
+def make_donut_plot(
+    data: pd.DataFrame,
+    player: str,
+    categories: List[str],
+) -> go.Figure:
+    """Make a donut plot comparing the given categories for the given player.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        DataFrame containing the data to be plotted.
+    player : str
+        Name of the player to be compared.
+    categories : List[str]
+        List of categories to be plotted.
+
+    Returns:
+    -------
+    go.Figure
+        The created figure with the donut plot.
+    """
+    values = data.query(f"name == '{player}'")[categories].iloc[0].tolist()
+
+    fig = go.Figure(
+        data=[
+            go.Pie(
+                labels=categories,
+                values=values,
+                hole=0.3,
+            )
+        ]
+    )
+    fig.update_traces(
+        textposition="inside",
+        textinfo="percent+label",
+    )
+
+    st.plotly_chart(fig)
+
+
+def make_gauge_plot(
+    current_value: Union[int, float],
+    max_value: Union[int, float],
+    title: str,
+) -> go.Figure:
+    """Make a gauge plot to compare the given current value with the given max value.
+
+    Parameters
+    ----------
+    current_value : Union[int, float]
+        The current value to be compared.
+    max_value : Union[int, float]
+        The maximum value to be compared.
+    title : str
+        The title of the plot.
+
+    Returns:
+    -------
+    go.Figure
+        The created figure with the gauge plot.
+    """
+    fig = go.Figure(
+        go.Indicator(
+            mode="gauge+number",
+            value=current_value,
+            gauge={
+                "axis": {"range": [0, max_value]},
+            },
+            domain={"x": [0, 1], "y": [0, 1]},
+            title={"text": title},
+        )
+    )
+
+    st.plotly_chart(fig)
+
+
+def make_bar_plot(
+    data: pd.DataFrame,
+    player: str,
+    x: Union[str, None] = None,
+    y: Union[str, None] = None,
+) -> go.Figure:
+    """Make a bar plot to compare the given player with the given data.
+
+    Parameters
+    ----------
+    data : pd.DataFrame
+        DataFrame containing the data to be plotted.
+    player : str
+        Player to be plotted.
+    x : Union[str, None]
+        The column to be used as the x-axis. If None, the index of data is used.
+    y : Union[str, None]
+        The column to be used as the y-axis. If None, all columns of data are used.
+
+    Returns:
+    -------
+    go.Figure
+        The created figure with the bar plot.
+    """
+    fig = px.bar(data.query(f"name == '{player}'"), x=x, y=y)
+
+    st.plotly_chart(fig)

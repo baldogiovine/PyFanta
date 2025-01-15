@@ -1,22 +1,19 @@
-"""Module to design and define a Streamlit app."""
+"""Module to design a Strealit page to check team's stats."""
 
 import json
 from typing import Dict, List
 
 import streamlit as st
-from pandas import DataFrame
 
-from src.streamlit_helpers import (
-    download_data_from_fastapi_api,
+from frontend.streamlit_helpers import (
     download_json_in_server,
     get_default_options,
     get_json_file_names,
-    load_matches_dataframe,
-    load_players_dataframe,
 )
 
 st.set_page_config(
-    page_title="PyFanta",
+    page_title="Check team's stats",
+    page_icon="⚽",
     layout="wide",
 )
 
@@ -29,30 +26,11 @@ if "team_name" not in st.session_state:
 if "loaded_team" not in st.session_state:
     st.session_state.loaded_team = {}
 
-st.title("PYFANTA")
+joined_df = st.session_state.joined_df
 
-# Download data
-st.title("Download data")
-if st.button(label="Download data"):
-    download_data_from_fastapi_api()
 
-# Show data
-matches_stats_df: DataFrame = load_matches_dataframe(
-    path_to_json="data/matches_data_2024-25.json"
-)
-outfield_players_df: DataFrame = load_players_dataframe(
-    path_to_json="data/outfiled_players_summary_stats_data_2024-25.json"
-)
-goalkeepers_df: DataFrame = load_players_dataframe(
-    path_to_json="data/goalkeepers_summary_stats_data_2024-25.json"
-)
-joined_df = (
-    matches_stats_df.set_index("name")
-    .combine_first(outfield_players_df.set_index("name"))
-    .combine_first(goalkeepers_df.set_index("name"))
-    .reset_index()
-)
-st.dataframe(data=joined_df)
+st.markdown("# Check your team's stats")
+
 
 st.divider()
 
