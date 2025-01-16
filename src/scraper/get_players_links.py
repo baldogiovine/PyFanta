@@ -22,11 +22,17 @@ class GetPlayersLinks:
 
     def __init__(self, year: str):  # noqa: D107
         self.year: str = year
-        self.__url: str = self.__construct_url()
+        self.__url: str = self._construct_url()
         self.__soup: Union[BeautifulSoup, None] = None
 
-    def __construct_url(self) -> str:
-        """Construct the full URL for fetching player links."""
+    def _construct_url(self) -> str:
+        """Constructs the URL to fetch the page content.
+
+        Returns:
+        -------
+        str
+            The URL to fetch the page content.
+        """
         return f"{PlayerLinksConstants.fantacalcio_link}/{self.year}/"
 
     async def __fetch_page(self) -> None:
@@ -71,7 +77,7 @@ class GetPlayersLinks:
             for link in links:
                 player_dict: Dict[str, str] = {
                     "name": link.get_text(separator="\n", strip=True),
-                    "link": self.__get_attribute_as_str(tag=link, attr_name="href"),
+                    "link": self._get_attribute_as_str(tag=link, attr_name="href"),
                 }
                 assert isinstance(player_dict, Dict)
                 assert (
@@ -92,7 +98,7 @@ class GetPlayersLinks:
             ) from e
 
     @staticmethod
-    def __get_attribute_as_str(tag: Tag, attr_name: str) -> str:
+    def _get_attribute_as_str(tag: Tag, attr_name: str) -> str:
         """Safely retrieve an attribute value from a BeautifulSoup Tag as a string.
 
         Parameters
