@@ -1,17 +1,17 @@
 """Module to get players links. Links are necessary to scrape players data."""
 
-import asyncio
+import re
 from typing import Dict, List, Union
 
-import aiohttp
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
+from src.scraper.beautiful_soup_base_scraping_class import BeautifulSoupBaseScraper
 from src.scraper.constants import PlayerLinksConstants
-from src.scraper.exceptions import FetchError, PageStructureError
+from src.scraper.exceptions import PageStructureError
 
 
-class GetPlayersLinks:
+class GetPlayersLinks(BeautifulSoupBaseScraper):
     """An asynchronous class to scrape player names and links from a specified year.
 
     Attributes:
@@ -21,9 +21,11 @@ class GetPlayersLinks:
     """
 
     def __init__(self, year: str):  # noqa: D107
+        if not re.match(r"^\d{4}-\d{2}$", year):
+            raise ValueError("Year must be in the format YYYY-YY, e.g., 2024-25")
         self.year: str = year
-        self.__url: str = self._construct_url()
-        self.__soup: Union[BeautifulSoup, None] = None
+        self.url: str = self._construct_url()
+        self.soup: Union[BeautifulSoup, None] = None
 
     def _construct_url(self) -> str:
         """Constructs the URL to fetch the page content.
@@ -35,19 +37,6 @@ class GetPlayersLinks:
         """
         return f"{PlayerLinksConstants.fantacalcio_link}/{self.year}/"
 
-    async def __fetch_page(self) -> None:
-        """Asynchronously fetch the page content and parse it with BeautifulSoup."""
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(self.__url, timeout=5) as response:
-                    response.raise_for_status()
-                    content: bytes = await response.read()
-                    self.__soup = BeautifulSoup(content, "lxml")
-        except aiohttp.ClientError as e:
-            raise FetchError(f"Error fetching URL {self.__url}: {e}") from e
-        except asyncio.TimeoutError as te:
-            raise FetchError(f"Request to {self.__url} timed out.") from te
-
     async def get_links(self) -> List[Dict[str, str]]:
         """Asynchronously extract player links from the webpage.
 
@@ -56,22 +45,30 @@ class GetPlayersLinks:
         List[Dict[str, str]]
             List of dictionaries containing players' names and links.
         """
-        if not self.__soup:
-            await self.__fetch_page()
-        assert isinstance(self.__soup, BeautifulSoup)
+        if not self.soup:
+            await self.fetch_page(url=self.url)
+        if not isinstance(self.soup, BeautifulSoup):
+            raise PageStructureError("Soup is not a BeautifulSoup instance.")
         try:
-            container: Union[Tag, NavigableString, None] = self.__soup.find(
+            container: Union[Tag, NavigableString, None] = self.soup.find(
                 "div", class_="container"
             )
-            assert isinstance(container, Tag)
+            if not isinstance(container, Tag):
+                raise PageStructureError("Missing or invalid 'container' div.")
+
             table_overflow: Union[Tag, NavigableString, None] = container.find(
                 "div", class_="table-overflow"
             )
-            assert isinstance(table_overflow, Tag)
+            if not isinstance(table_overflow, Tag):
+                raise PageStructureError("Missing or invalid 'table-overflow' div.")
+
             table: Union[Tag, NavigableString, None] = table_overflow.find("table")
-            assert isinstance(table, Tag)
+            if not isinstance(table, Tag):
+                raise PageStructureError("Missing or invalid 'table' tag.")
+
             links: List[Tag] = table.find_all("a", class_="player-name player-link")
-            assert isinstance(links, List)
+            if not isinstance(links, list):
+                raise PageStructureError("No player links found in the table.")
 
             data: List[Dict[str, str]] = []
             for link in links:
@@ -79,22 +76,15 @@ class GetPlayersLinks:
                     "name": link.get_text(separator="\n", strip=True),
                     "link": self._get_attribute_as_str(tag=link, attr_name="href"),
                 }
-                assert isinstance(player_dict, Dict)
-                assert (
-                    isinstance(player_dict.get("name"), str)
-                    and player_dict.get("name") is not None
-                )
-                assert (
-                    isinstance(player_dict.get("link"), str)
-                    and player_dict.get("link") is not None
-                )
-                if player_dict.get("link")[-7:] != self.year:  # type: ignore
+                if not player_dict["name"] or not player_dict["link"]:
+                    raise PageStructureError("Player name or link is missing.")
+                if player_dict["link"][-7:] != self.year:
                     player_dict["link"] = f'{player_dict.get("link")}/{self.year}'
                 data.append(player_dict)
             return data
         except AttributeError as e:
             raise PageStructureError(
-                "Unexpected page structure while extracting player links"
+                "Unexpected page structure while extracting player links."
             ) from e
 
     @staticmethod
@@ -114,10 +104,15 @@ class GetPlayersLinks:
             The attribute value as a string. If the attribute is not found or its
             value is `None`, returns an empty string.
         """
-        attr_value: Union[str, List[str], None] = tag.get(attr_name)
-        if isinstance(attr_value, str):
-            return attr_value
-        elif isinstance(attr_value, list):
-            return attr_value[0] if attr_value else ""
-        else:
-            return ""
+        try:
+            attr_value: Union[str, List[str], None] = tag.get(attr_name)
+            if isinstance(attr_value, str):
+                return attr_value
+            elif isinstance(attr_value, list):
+                return attr_value[0] if attr_value else ""
+            else:
+                return ""
+        except Exception as e:
+            raise ValueError(
+                f"Failed to get attribute '{attr_name}' from tag: {e}"
+            ) from e

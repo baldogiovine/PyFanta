@@ -4,7 +4,9 @@ from unittest.mock import patch
 
 import pytest
 from aioresponses import aioresponses
+from bs4 import BeautifulSoup
 
+from src.scraper.exceptions import PageStructureError
 from src.scraper.get_players_links import GetPlayersLinks
 
 
@@ -51,7 +53,10 @@ def test_construct_url(year: str, expected_url: str) -> None:
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_get_links_success(year: str, url: str) -> None:
+async def test_get_links_success(
+    year: str,
+    url: str,
+) -> None:
     """Test that get_links successfully extracts player names and links."""
     mocked_html = """
     <div class="container">
@@ -89,3 +94,82 @@ async def test_get_links_success(year: str, url: str) -> None:
             result[1]["link"]
             == "https://www.fantacalcio.it/serie-a/squadre/milan/pulisic/2423/2024-25"
         )
+
+
+def test_invalid_year_format() -> None:
+    """Test that invalid year formats raise ValueError."""
+    invalid_years = ["2023", "23-24", "abcd-ef"]
+    for year in invalid_years:
+        with pytest.raises(ValueError, match="Year must be in the format YYYY-YY"):
+            GetPlayersLinks(year)
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_get_links_empty_result(year: str, url: str) -> None:
+    """Test behavior when no player links are present."""
+    mocked_html = """
+    <div class="container">
+        <div class="table-overflow">
+            <table></table>
+        </div>
+    </div>
+    """
+    with aioresponses() as mocked:
+        mocked.get(url, status=200, body=mocked_html)
+
+        scraper = GetPlayersLinks(year)
+        result = await scraper.get_links()
+
+        assert result == []
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_get_links_malformed_structure(year: str, url: str) -> None:
+    """Test behavior with a malformed page structure."""
+    mocked_html = """
+    <div class="invalid-container">
+        <div class="missing-table"></div>
+    </div>
+    """
+    with aioresponses() as mocked:
+        mocked.get(url, status=200, body=mocked_html)
+
+        scraper = GetPlayersLinks(year)
+        with pytest.raises(PageStructureError):
+            await scraper.get_links()
+
+
+def test_get_attribute_as_str_valid_string() -> None:
+    """Test _get_attribute_as_str with a valid string attribute."""
+    tag = BeautifulSoup('<a href="https://example.com">Link</a>', "lxml").a
+    result = GetPlayersLinks._get_attribute_as_str(tag, "href")
+    assert result == "https://example.com"
+
+
+def test_get_attribute_as_str_valid_list() -> None:
+    """Test _get_attribute_as_str with a list attribute."""
+    tag = BeautifulSoup("<a data-list=\"['value1', 'value2']\">Link</a>", "lxml").a
+    tag["data-list"] = ["value1", "value2"]
+    result = GetPlayersLinks._get_attribute_as_str(tag, "data-list")
+    assert result == "value1"
+
+
+def test_get_attribute_as_str_missing_attribute() -> None:
+    """Test _get_attribute_as_str with a missing attribute."""
+    tag = BeautifulSoup("<a>Link</a>", "lxml").a
+    result = GetPlayersLinks._get_attribute_as_str(tag, "href")
+    assert result == ""
+
+
+def test_get_attribute_as_str_none_value() -> None:
+    """Test _get_attribute_as_str with an attribute value of None."""
+    tag = BeautifulSoup('<a href="https://example.com">Link</a>', "lxml").a
+    tag["href"] = None
+    result = GetPlayersLinks._get_attribute_as_str(tag, "href")
+    assert result == ""
+
+
+def test_get_attribute_as_str_invalid_tag() -> None:
+    """Test _get_attribute_as_str with an invalid tag."""
+    with pytest.raises(ValueError, match="Failed to get attribute"):
+        GetPlayersLinks._get_attribute_as_str(None, "href")
