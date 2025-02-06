@@ -9,13 +9,25 @@ from src.scraper.beautiful_soup_base_scraping_class import BeautifulSoupBaseScra
 from src.scraper.exceptions import FetchError
 
 
-@pytest.mark.asyncio  # type: ignore
-async def test_fetch_page_success() -> None:
-    """Test that fetch_page successfully fetches and parses content."""
-    url = "https://mocked_url.com"
-    mocked_html = "<html><body><h1>Hello, World!</h1></body></html>"
+@pytest.fixture(scope="module")  # type: ignore
+def url() -> str:
+    """Pytest fixture that returns a mocked url to be used in tests."""
+    return "https://mocked_url.com"
 
-    scraper = BeautifulSoupBaseScraper()
+
+@pytest.fixture(scope="module")  # type: ignore
+def scraper() -> BeautifulSoupBaseScraper:
+    """Pytest fixture to create a BeautifulSoupBaseScraper object for testing."""
+    return BeautifulSoupBaseScraper()
+
+
+@pytest.mark.asyncio  # type: ignore
+async def test_fetch_page_success(
+    url: str,
+    scraper: BeautifulSoupBaseScraper,
+) -> None:
+    """Test that fetch_page successfully fetches and parses content."""
+    mocked_html = "<html><body><h1>Hello, World!</h1></body></html>"
 
     with aioresponses() as mocked:
         mocked.get(url, status=200, body=mocked_html)
@@ -27,12 +39,11 @@ async def test_fetch_page_success() -> None:
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_fetch_page_client_error() -> None:
+async def test_fetch_page_client_error(
+    url: str,
+    scraper: BeautifulSoupBaseScraper,
+) -> None:
     """Test that fetch_page raises FetchError on client errors."""
-    url = "https://mocked_url.com"
-
-    scraper = BeautifulSoupBaseScraper()
-
     with aioresponses() as mocked:
         mocked.get(url, status=404)
 
@@ -41,12 +52,11 @@ async def test_fetch_page_client_error() -> None:
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_fetch_page_timeout_error() -> None:
+async def test_fetch_page_timeout_error(
+    url: str,
+    scraper: BeautifulSoupBaseScraper,
+) -> None:
     """Test that fetch_page raises FetchError on timeout."""
-    url = "https://mocked_url.com"
-
-    scraper = BeautifulSoupBaseScraper()
-
     with aioresponses() as mocked:
         mocked.get(url, exception=asyncio.TimeoutError)  # Simulate a timeout
 
@@ -54,10 +64,8 @@ async def test_fetch_page_timeout_error() -> None:
             await scraper.fetch_page(url)
 
 
-def test_fetch_page_invalid_url() -> None:
+def test_fetch_page_invalid_url(scraper: BeautifulSoupBaseScraper) -> None:
     """Test that fetch_page raises AssertionError for non-string URLs."""
-    scraper = BeautifulSoupBaseScraper()
-
     # Using pytest.raises for assertion failure
     with pytest.raises(AssertionError):
         asyncio.run(scraper.fetch_page(12345))  # type: ignore

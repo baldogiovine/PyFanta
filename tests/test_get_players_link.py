@@ -10,27 +10,21 @@ from src.scraper.exceptions import PageStructureError
 from src.scraper.get_players_links import GetPlayersLinks
 
 
-@pytest.fixture  # type: ignore
+@pytest.fixture(scope="module")  # type: ignore
 def year() -> str:
     """Pytest fixture to pass "year" parameter to GetPlayersLinks class."""
     return "2024-25"
 
 
-@pytest.fixture  # type: ignore
-def url(year: str) -> str:
-    """Pytest fixture to construct the URL for fetching player links.
+@pytest.fixture(scope="function")  # type: ignore
+def scraper(year: str) -> GetPlayersLinks:
+    """Pytest fixture to create a GetPlayersLinks object for testing."""
+    return GetPlayersLinks(year)
 
-    Parameters
-    ----------
-    year : str
-        The year for which player links are to be fetched.
 
-    Returns:
-    -------
-    str
-        The constructed URL for the specified year.
-    """
-    scraper = GetPlayersLinks(year)
+@pytest.fixture(scope="function")  # type: ignore
+def url(scraper: GetPlayersLinks) -> str:
+    """Pytest fixture to construct the URL for fetching player links."""
     return scraper._construct_url()
 
 
@@ -42,7 +36,10 @@ def url(year: str) -> str:
         ("2022-23", "https://mocked_link/2022-23/"),
     ],
 )
-def test_construct_url(year: str, expected_url: str) -> None:
+def test_construct_url(
+    year: str,
+    expected_url: str,
+) -> None:
     """Test URL construction directly with a patched constant."""
     with patch(
         "src.scraper.constants.PlayerLinksConstants.fantacalcio_link",
@@ -54,7 +51,7 @@ def test_construct_url(year: str, expected_url: str) -> None:
 
 @pytest.mark.asyncio  # type: ignore
 async def test_get_links_success(
-    year: str,
+    scraper: GetPlayersLinks,
     url: str,
 ) -> None:
     """Test that get_links successfully extracts player names and links."""
@@ -79,7 +76,6 @@ async def test_get_links_success(
     with aioresponses() as mocked:
         mocked.get(url, status=200, body=mocked_html)
 
-        scraper = GetPlayersLinks(year)
         result = await scraper.get_links()
 
         number_results = 2
@@ -105,7 +101,10 @@ def test_invalid_year_format() -> None:
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_get_links_empty_result(year: str, url: str) -> None:
+async def test_get_links_empty_result(
+    scraper: GetPlayersLinks,
+    url: str,
+) -> None:
     """Test behavior when no player links are present."""
     mocked_html = """
     <div class="container">
@@ -117,14 +116,16 @@ async def test_get_links_empty_result(year: str, url: str) -> None:
     with aioresponses() as mocked:
         mocked.get(url, status=200, body=mocked_html)
 
-        scraper = GetPlayersLinks(year)
         result = await scraper.get_links()
 
         assert result == []
 
 
 @pytest.mark.asyncio  # type: ignore
-async def test_get_links_malformed_structure(year: str, url: str) -> None:
+async def test_get_links_malformed_structure(
+    scraper: GetPlayersLinks,
+    url: str,
+) -> None:
     """Test behavior with a malformed page structure."""
     mocked_html = """
     <div class="invalid-container">
@@ -134,7 +135,6 @@ async def test_get_links_malformed_structure(year: str, url: str) -> None:
     with aioresponses() as mocked:
         mocked.get(url, status=200, body=mocked_html)
 
-        scraper = GetPlayersLinks(year)
         with pytest.raises(PageStructureError):
             await scraper.get_links()
 

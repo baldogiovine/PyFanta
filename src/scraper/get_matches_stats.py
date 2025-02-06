@@ -1,19 +1,18 @@
 """Module to get players historical stats."""
 
-import asyncio
 from typing import List, Tuple, Union
 
-import aiohttp
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from src.api.models import PlayerLink
 from src.scraper import utils
-from src.scraper.exceptions import FetchError, PageStructureError
+from src.scraper.beautiful_soup_base_scraping_class import BeautifulSoupBaseScraper
+from src.scraper.exceptions import PageStructureError
 from src.scraper.utils import check_for_soup
 
 
-class GetMatchesStats:
+class GetMatchesStats(BeautifulSoupBaseScraper):
     """Class to get players' match stats."""
 
     def __init__(self, player_link: PlayerLink):  # noqa: D107
@@ -31,20 +30,6 @@ class GetMatchesStats:
         self.guest_team_score: Union[List[int], None] = None
         self.sub_in: Union[List[Union[float, None]], None] = None
         self.sub_out: Union[List[Union[float, None]], None] = None
-
-    async def fetch_page(self) -> None:
-        """Asynchronously fetch the page content and parse it with BeautifulSoup."""
-        try:
-            async with aiohttp.ClientSession() as session:
-                assert isinstance(self.url, str)
-                async with session.get(self.url, timeout=5) as response:
-                    response.raise_for_status()
-                    content: bytes = await response.read()
-                    self.soup = BeautifulSoup(content, "lxml")
-        except aiohttp.ClientError as e:
-            raise FetchError(f"Error fetching URL {self.url}: {e}") from e
-        except asyncio.TimeoutError as te:
-            raise FetchError(f"Request to {self.url} timed out.") from te
 
     def get_game_day(self) -> List[int]:
         """Gets game days.
@@ -290,7 +275,7 @@ class GetMatchesStats:
 
     async def scrape_all(self) -> None:
         """Fetch the page and scrape all available stats."""
-        await self.fetch_page()
+        await self.fetch_page(url=self.url)
 
         self.get_game_day()
         await self.get_grade()
